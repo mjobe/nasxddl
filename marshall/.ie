@@ -1,0 +1,5 @@
+  <fragment id="xxx">
+    <record name="yyy">
+      <field length="zzz" name="yyy" type="xxx"/>
+    </record>
+  </fragment>

@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<xddl version="2.0000" >
+
+  <!-- TYPES -->
+  <type id="xxx">
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+  <type id="ProtocolDiscriminator">
+    <!-- 9.2 -->
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+  <type id="SecurityHeaderType">
+    <!-- 9.3.1 -->
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+  <type id="MessageType">
+    <!-- 9.8 -->
+    <enum>
+      <item key="0b01000001" value="Attach request"/>
+      <item key="0b01000010" value="Attach accept"/>
+      <item key="0b01000011" value="Attach complete"/>
+      <item key="0b01000100" value="Attach reject"/>
+      <item key="0b01000101" value="Detach request"/>
+      <item key="0b01000110" value="Detach accept"/>
+      <item key="0b01001000" value="Tracking area update request"/>
+      <item key="0b01001001" value="Tracking area update accept"/>
+      <item key="0b01001010" value="Tracking area update complete"/>
+      <item key="0b01001011" value="Tracking area update reject"/>
+      <item key="0b01001100" value="Extended service request"/>
+      <item key="0b01001110" value="Service reject"/>
+      <item key="0b01010000" value="GUTI reallocation command"/>
+      <item key="0b01010001" value="GUTI reallocation complete"/>
+      <item key="0b01010010" value="Authentication request"/>
+      <item key="0b01010011" value="Authentication response"/>
+      <item key="0b01010100" value="Authentication reject"/>
+      <item key="0b01011100" value="Authentication failure"/>
+      <item key="0b01010101" value="Identity request"/>
+      <item key="0b01010110" value="Identity response"/>
+      <item key="0b01011101" value="Security mode command"/>
+      <item key="0b01011110" value="Security mode complete"/>
+      <item key="0b01011111" value="Security mode reject"/>
+      <item key="0b01100000" value="EMM status"/>
+      <item key="0b01100001" value="EMM information"/>
+      <item key="0b01100010" value="Downlink NAS transport"/>
+      <item key="0b01100011" value="Uplink NAS transport"/>
+      <item key="0b01100100" value="CS Service notification"/>
+      <item key="0b11000001" value="Activate default EPS bearer context request"/>
+      <item key="0b11000010" value="Activate default EPS bearer context accept"/>
+      <item key="0b11000011" value="Activate default EPS bearer context reject"/>
+      <item key="0b11000101" value="Activate dedicated EPS bearer context request"/>
+      <item key="0b11000110" value="Activate dedicated EPS bearer context accept"/>
+      <item key="0b11000111" value="Activate dedicated EPS bearer context reject"/>
+      <item key="0b11001001" value="Modify EPS bearer context request"/>
+      <item key="0b11001010" value="Modify EPS bearer context accept"/>
+      <item key="0b11001011" value="Modify EPS bearer context reject"/>
+      <item key="0b11001101" value="Deactivate EPS bearer context request"/>
+      <item key="0b11001110" value="Deactivate EPS bearer context accept"/>
+      <item key="0b11010000" value="PDN connectivity request"/>
+      <item key="0b11010001" value="PDN connectivity reject"/>
+      <item key="0b11010010" value="PDN disconnect request"/>
+      <item key="0b11010011" value="PDN disconnect reject"/>
+      <item key="0b11010100" value="Bearer resource allocation request"/>
+      <item key="0b11010101" value="Bearer resource allocation reject"/>
+      <item key="0b11010110" value="Bearer resource modification request"/>
+      <item key="0b11010111" value="Bearer resource modification reject"/>
+      <item key="0b11011001" value="ESM information request"/>
+      <item key="0b11011010" value="ESM information response"/>
+      <item key="0b11101000" value="ESM status"/>
+    </enum>
+  </type>
+  <type id="EPSAttachResult">
+    <!-- 9.9.3.10 -->
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+  <type id="EPSAttachResultValue">
+    <!-- 9.9.3.10 -->
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+
+  <!-- IE FRAGMENTS -->
+  <fragment id="ProtocolDiscriminator">
+    <!-- 9.2 -->
+    <record name="Protocol Discriminator">
+      <field length="4" name="ProtocolDiscriminator" type="#ProtocolDiscriminator"/>
+    </record>
+  </fragment>
+  <fragment id="SecurityHeaderType">
+    <!-- 9.3.1 -->
+    <record name="Security Header Type">
+      <field length="4" name="SecurityHeaderType" type="#SecurityHeaderType"/>
+    </record>
+  </fragment>
+  <fragment id="MessageType">
+    <!-- 9.8 -->
+    <!-- <record name="Message Type" import="true"> -->
+      <field length="8" name="MessageType" type="#MessageType"/>
+      <setprop name="Name" value="MessageType"/>
+    <!-- </record> -->
+  </fragment>
+  <fragment id="EPSAttachResult">
+    <!-- 9.9.3.10 -->
+    <record name="EPS Attach Result">
+      <field length="4" name="IEI"/>
+      <field length="1" name="Spare"/>
+      <field length="3" name="EPSAttachResultValue" type="#EPSAttachResultValue"/>
+    </record>
+  </fragment>
+  <fragment id="SpareHalfOctet">
+    <record name="Spare Half Octet">
+      <field length="4" name="SpareHalfOctet"/>
+    </record>
+  </fragment>
+  <fragment id="GPRSTimer">
+    <!-- 9.9.3.16 -->
+    <record name="GPRSTimer">
+      <field length="8" name="GPRSTimer"/>
+    </record>
+  </fragment>
+  <fragment id="T3412value">
+    <record name="T3412value">
+      <fragment href="#GPRSTimer"/>
+    </record>
+  </fragment>
+  <fragment id="TAIList">
+    <!-- 9.9.3.33 -->
+    <record name="Tracking Area Identity List">
+      <field length="8" name="IEI"/>
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <field length="1" name="Spare"/>
+        <field length="2" name="ListType"/>
+        <field length="5" name="NumElements"/>
+        <switch expr="ListType">
+         <case value="0b00">
+            <field length="4" name="MCCDigit2"/>
+            <field length="4" name="MCCDigit1"/>
+            <field length="4" name="MNCDigit3"/>
+            <field length="4" name="MCCDigit3"/>
+            <field length="4" name="MNCDigit2"/>
+            <field length="4" name="MNCDigit1"/>
+            <repeat num="NumElements">
+              <field length="16" name="TAC"/>
+            </repeat>
+         </case>
+         <case value="0b01">
+            <field length="4" name="MCCDigit2"/>
+            <field length="4" name="MCCDigit1"/>
+            <field length="4" name="MNCDigit3"/>
+            <field length="4" name="MCCDigit3"/>
+            <field length="4" name="MNCDigit2"/>
+            <field length="4" name="MNCDigit1"/>
+            <field length="16" name="TAC"/>
+         </case>
+         <case value="0b10">
+            <repeat num="NumElements">
+              <field length="4" name="MCCDigit2"/>
+              <field length="4" name="MCCDigit1"/>
+              <field length="4" name="MNCDigit3"/>
+              <field length="4" name="MCCDigit3"/>
+              <field length="4" name="MNCDigit2"/>
+              <field length="4" name="MNCDigit1"/>
+              <field length="16" name="TAC"/>
+            </repeat>
+         </case>
+        </switch>
+      </record>
+    </record>
+  </fragment>
+  <fragment id="ESMMessageContainer">
+    <!-- 9.9.3.15 -->
+    <record name="ESM Message Container">
+      <field length="8" name="IEI"/>
+      <field length="16" name="Length"/>
+      <field length="8 * Length" name="ESMMessage"/>
+    </record>
+  </fragment>
+  <fragment id="EPSMobileIdentityGUTI">
+    <!-- 9.9.3.12 -->
+    <record name="EPS Mobile Identity (GUTI)">
+      <field length="8" name="IEI"/>
+      <field length="8" name="Length"/>
+      <field length="4" name="Spare"/>
+      <field length="4" name="MCCDigit2"/>
+      <field length="4" name="MCCDigit1"/>
+      <field length="4" name="MNCDigit3"/>
+      <field length="4" name="MCCDigit3"/>
+      <field length="4" name="MNCDigit2"/>
+      <field length="4" name="MNCDigit1"/>
+      <field length="16" name="MMEGroupID"/>
+      <field length="8" name="MMECode" type="#xxx"/>
+      <field length="32" name="M_TMSI"/>
+    </record>
+  </fragment>
+  <fragment id="GUTI">
+    <record name="GUTI">
+      <fragment href="#EPSMobileIdentityGUTI"/>
+    </record>
+  </fragment>
+  <fragment id="LocationAreaIdentification">
+    <!-- 9.9.2.2 (TS 24.008 10.5.1.3)-->
+    <record name="LocationAreaIdentification" length="6*8">
+      <field length="1" name="Spare"/>
+      <field length="7" name="IEI"/>
+      <field length="4" name="MCCDigit2"/>
+      <field length="4" name="MCCDigit1"/>
+      <field length="4" name="MNCDigit3"/>
+      <field length="4" name="MCCDigit3"/>
+      <field length="4" name="MNCDigit2"/>
+      <field length="4" name="MNCDigit1"/>
+      <field length="16" name="LAC" type="#xxx"/>
+    </record>
+  </fragment>
+  <fragment id="MobileIdentity">
+    <!-- 9.9.2.3 (TS 24.008 10.5.1.4)-->
+    <record name="MobileIdentity">
+    </record>
+  </fragment>
+  <fragment id="MSIdentity">
+    <record name="MSIdentity">
+      <fragment href="#MobileIdentity"/>
+    </record>
+  </fragment>
+  <fragment id="EMMCause">
+    <!-- 9.9.3.9 -->
+    <record name="EMMCause">
+      <field length="8" name="IEI"/>
+      <field length="8" name="CauseValue" type="#xxx"/>
+    </record>
+  </fragment>
+  <fragment id="T3402value">
+    <record name="T3402value">
+      <fragment href="#GPRSTimer"/>
+    </record>
+  </fragment>
+  <fragment id="T3423value">
+    <record name="T3423value">
+      <fragment href="#GPRSTimer"/>
+    </record>
+  </fragment>
+  <fragment id="PLMNList">
+    <!-- 9.9.2.8 (TS 24.008 10.5.1.13)-->
+    <record name="PLMNList">
+      <field length="xxx" name="xxx" type="#xxx"/>
+    </record>
+  </fragment>
+  <fragment id="EquivalentPLMNs">
+    <record name="EquivalentPLMNs">
+      <fragment href="#PLMNList"/>
+    </record>
+  </fragment>
+  <fragment id="EmergencyNumberList">
+    <!-- 9.9.3.37 -->
+    <record name="EmergencyNumberList">
+      <field length="xxx" name="xxx" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- MESSAGE FRAGMENTS -->
+  <fragment id="AttachAccept" name="ATTACH ACCEPT">
+    <fragment href="#EPSAttachResult"/>
+    <fragment href="#SpareHalfOctet"/>
+    <fragment href="#T3412value"/>
+    <fragment href="#TAIList"/>
+    <fragment href="#ESMMessageContainer"/>
+    <fragment href="#GUTI"/>
+    <fragment href="#LocationAreaIdentification"/>
+    <fragment href="#MSIdentity"/>
+    <fragment href="#EMMCause"/>
+    <fragment href="#T3402value"/>
+    <fragment href="#T3423value"/>
+    <fragment href="#EquivalentPLMNs"/>
+    <fragment href="#EmergencyNumberList"/>
+  </fragment>
+
+  <structure>
+    <oob>
+      <prop name="Name" value="999" type="#MessageType"/>
+    </oob>
+    <fragment href="#ProtocolDiscriminator"/>
+    <fragment href="#SecurityHeaderType"/>
+    <fragment href="#MessageType"/>
+    <switch expr="MessageType">
+      <case value="0b01000001">
+      </case>
+      <case value="0b01000010">
+      </case>
+      <case value="0b01000011">
+      </case>
+      <case value="0b01000100">
+      </case>
+      <case value="0b01000101">
+      </case>
+      <case value="0b01000110">
+      </case>
+      <case value="0b01001000">
+      </case>
+      <case value="0b01001001">
+      </case>
+      <case value="0b01001010">
+      </case>
+      <case value="0b01001011">
+      </case>
+      <case value="0b01001100">
+      </case>
+      <case value="0b01001110">
+      </case>
+      <case value="0b01010000">
+      </case>
+      <case value="0b01010001">
+      </case>
+      <case value="0b01010010">
+      </case>
+      <case value="0b01010011">
+      </case>
+      <case value="0b01010100">
+      </case>
+      <case value="0b01011100">
+      </case>
+      <case value="0b01010101">
+      </case>
+      <case value="0b01010110">
+      </case>
+      <case value="0b01011101">
+      </case>
+      <case value="0b01011110">
+      </case>
+      <case value="0b01011111">
+      </case>
+      <case value="0b01100000">
+      </case>
+      <case value="0b01100001">
+      </case>
+      <case value="0b01100010">
+      </case>
+      <case value="0b01100011">
+      </case>
+      <case value="0b01100100">
+      </case>
+      <case value="0b11000001">
+      </case>
+      <case value="0b11000010">
+      </case>
+      <case value="0b11000011">
+      </case>
+      <case value="0b11000101">
+      </case>
+      <case value="0b11000110">
+      </case>
+      <case value="0b11000111">
+      </case>
+      <case value="0b11001001">
+      </case>
+      <case value="0b11001010">
+      </case>
+      <case value="0b11001011">
+      </case>
+      <case value="0b11001101">
+      </case>
+      <case value="0b11001110">
+      </case>
+      <case value="0b11010000">
+      </case>
+      <case value="0b11010001">
+      </case>
+      <case value="0b11010010">
+      </case>
+      <case value="0b11010011">
+      </case>
+      <case value="0b11010100">
+      </case>
+      <case value="0b11010101">
+      </case>
+      <case value="0b11010110">
+      </case>
+      <case value="0b11010111">
+      </case>
+      <case value="0b11011001">
+      </case>
+      <case value="0b11011010">
+      </case>
+      <case value="0b11101000">
+      </case>
+    </switch>
+  </structure>
+</xddl>

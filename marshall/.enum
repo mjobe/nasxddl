@@ -1,0 +1,5 @@
+  <type id="BandClass">
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>

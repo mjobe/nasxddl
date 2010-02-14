@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<xddl>
+ <structure>
+  <field name="RecordType" length="8"/>
+  <field name="RecordLength" length="8"/>
+  <record name="InformationFields" length="RecordLength * 8">
+    <repeat name="repeat">
+      <field name="One" length="8"/>
+      <field name="Two" length="8"/>
+      <field name="Three" length="8"/>
+    </repeat>
+  </record>
+ </structure>
+</xddl>
