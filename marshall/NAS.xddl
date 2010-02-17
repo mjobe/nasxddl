@@ -107,52 +107,74 @@
       <setprop name="Name" value="MessageType"/>
     <!-- </record> -->
   </fragment>
-  <fragment id="EPSAttachResult">
-    <!-- 9.9.3.10 -->
+
+  <!-- 9.9.3.10 -->
+  <fragment id="EPSAttachResult_V">
     <record name="EPS Attach Result">
-      <field length="4" name="IEI"/>
       <field length="1" name="Spare"/>
-      <field length="3" name="EPSAttachResultValue" type="#EPSAttachResultValue"/>
+      <field length="3" name="Value" type="#EPSAttachResultValue"/>
     </record>
   </fragment>
+
   <fragment id="SpareHalfOctet">
     <record name="Spare Half Octet">
       <field length="4" name="SpareHalfOctet"/>
     </record>
   </fragment>
-  <fragment id="GPRSTimer">
-    <!-- 9.9.3.16 -->
+
+  <!-- 24.008 TS 10.5.7.3 -->
+  <fragment id="GPRSTimer_V">
     <record name="GPRSTimer">
       <field length="8" name="GPRSTimer"/>
     </record>
   </fragment>
-  <fragment id="T3412value">
+
+  <!-- 9.9.3.16 -->
+  <fragment id="T3412value_V">
     <record name="T3412value">
-      <fragment href="#GPRSTimer"/>
+      <fragment href="#GPRSTimer_V"/>
     </record>
   </fragment>
-  <fragment id="TAIList">
-    <!-- 9.9.3.33 -->
-    <record name="Tracking Area Identity List">
-      <field length="8" name="IEI"/>
-      <field length="8" name="Length"/>
-      <record name="Contents" length="8 * Length">
-        <field length="1" name="Spare"/>
-        <field length="2" name="ListType"/>
-        <field length="5" name="NumElements"/>
-        <switch expr="ListType">
-         <case value="0b00">
-            <field length="4" name="MCCDigit2"/>
-            <field length="4" name="MCCDigit1"/>
-            <field length="4" name="MNCDigit3"/>
-            <field length="4" name="MCCDigit3"/>
-            <field length="4" name="MNCDigit2"/>
-            <field length="4" name="MNCDigit1"/>
-            <repeat num="NumElements">
-              <field length="16" name="TAC"/>
-            </repeat>
-         </case>
-         <case value="0b01">
+  <fragment id="T3402value_V">
+    <record name="T3402value">
+      <fragment href="#GPRSTimer_V"/>
+    </record>
+  </fragment>
+  <fragment id="T3423value_V">
+    <record name="T3423value">
+      <fragment href="#GPRSTimer_V"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.33 -->
+  <fragment id="TAIList_VOnly">
+    <record name="Contents" length="8 * Length">
+      <field length="1" name="Spare"/>
+      <field length="2" name="ListType"/>
+      <field length="5" name="NumElements"/>
+      <switch expr="ListType">
+       <case value="0b00">
+          <field length="4" name="MCCDigit2"/>
+          <field length="4" name="MCCDigit1"/>
+          <field length="4" name="MNCDigit3"/>
+          <field length="4" name="MCCDigit3"/>
+          <field length="4" name="MNCDigit2"/>
+          <field length="4" name="MNCDigit1"/>
+          <repeat num="NumElements" name="Num Elements" >
+            <field length="16" name="TAC"/>
+          </repeat>
+       </case>
+       <case value="0b01">
+          <field length="4" name="MCCDigit2"/>
+          <field length="4" name="MCCDigit1"/>
+          <field length="4" name="MNCDigit3"/>
+          <field length="4" name="MCCDigit3"/>
+          <field length="4" name="MNCDigit2"/>
+          <field length="4" name="MNCDigit1"/>
+          <field length="16" name="TAC"/>
+       </case>
+       <case value="0b10">
+          <repeat num="NumElements">
             <field length="4" name="MCCDigit2"/>
             <field length="4" name="MCCDigit1"/>
             <field length="4" name="MNCDigit3"/>
@@ -160,128 +182,204 @@
             <field length="4" name="MNCDigit2"/>
             <field length="4" name="MNCDigit1"/>
             <field length="16" name="TAC"/>
-         </case>
-         <case value="0b10">
-            <repeat num="NumElements">
-              <field length="4" name="MCCDigit2"/>
-              <field length="4" name="MCCDigit1"/>
-              <field length="4" name="MNCDigit3"/>
-              <field length="4" name="MCCDigit3"/>
-              <field length="4" name="MNCDigit2"/>
-              <field length="4" name="MNCDigit1"/>
-              <field length="16" name="TAC"/>
-            </repeat>
-         </case>
-        </switch>
-      </record>
+          </repeat>
+       </case>
+      </switch>
     </record>
   </fragment>
-  <fragment id="ESMMessageContainer">
-    <!-- 9.9.3.15 -->
+  <fragment id="TAIList_LV">
+    <record name="Tracking Area Identity List">
+      <field length="8" name="Length"/>
+      <fragment href="#TAIList_VOnly"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.15 -->
+  <fragment id="ESMMessageContainer_LVE">
+    <record name="ESM Message Container">
+      <field length="16" name="Length"/>
+      <field length="8 * Length" name="ESMMessage"/>
+    </record>
+  </fragment>
+  <fragment id="ESMMessageContainer_TLVE">
     <record name="ESM Message Container">
       <field length="8" name="IEI"/>
       <field length="16" name="Length"/>
       <field length="8 * Length" name="ESMMessage"/>
     </record>
   </fragment>
-  <fragment id="EPSMobileIdentityGUTI">
-    <!-- 9.9.3.12 -->
+
+  <!-- 9.9.3.12 -->
+  <fragment id="EPSMobileIdentityGUTI_VOnly">
+    <field length="4" name="Spare"/>
+    <field length="1" name="Odd_Even_Indic"/>
+    <field length="3" name="IdentityType"/>
+    <field length="4" name="MCCDigit2"/>
+    <field length="4" name="MCCDigit1"/>
+    <field length="4" name="MNCDigit3"/>
+    <field length="4" name="MCCDigit3"/>
+    <field length="4" name="MNCDigit2"/>
+    <field length="4" name="MNCDigit1"/>
+    <field length="16" name="MMEGroupID"/>
+    <field length="8" name="MMECode" type="#xxx"/>
+    <field length="32" name="M_TMSI"/>
+  </fragment>
+  <fragment id="EPSMobileIdentityGUTI_LV">
     <record name="EPS Mobile Identity (GUTI)">
-      <field length="8" name="IEI"/>
       <field length="8" name="Length"/>
-      <field length="4" name="Spare"/>
-      <field length="4" name="MCCDigit2"/>
-      <field length="4" name="MCCDigit1"/>
-      <field length="4" name="MNCDigit3"/>
-      <field length="4" name="MCCDigit3"/>
-      <field length="4" name="MNCDigit2"/>
-      <field length="4" name="MNCDigit1"/>
-      <field length="16" name="MMEGroupID"/>
-      <field length="8" name="MMECode" type="#xxx"/>
-      <field length="32" name="M_TMSI"/>
+      <record name="Contents" length="Length * 8">
+        <fragment href="#EPSMobileIdentityGUTI_VOnly"/>
+      </record>
     </record>
   </fragment>
-  <fragment id="GUTI">
-    <record name="GUTI">
-      <fragment href="#EPSMobileIdentityGUTI"/>
+
+  <!-- 9.9.2.2 (TS 24.008 10.5.1.3)-->
+  <fragment id="LocationAreaIdentification_VOnly">
+    <field length="4" name="MCCDigit2"/>
+    <field length="4" name="MCCDigit1"/>
+    <field length="4" name="MNCDigit3"/>
+    <field length="4" name="MCCDigit3"/>
+    <field length="4" name="MNCDigit2"/>
+    <field length="4" name="MNCDigit1"/>
+    <field length="16" name="LAC" type="#xxx"/>
+  </fragment>
+  <fragment id="LocationAreaIdentification_V">
+    <record name="LocationAreaIdentification">
+      <fragment href="#LocationAreaIdentification_VOnly"/>
     </record>
   </fragment>
-  <fragment id="LocationAreaIdentification">
-    <!-- 9.9.2.2 (TS 24.008 10.5.1.3)-->
-    <record name="LocationAreaIdentification" length="6*8">
-      <field length="1" name="Spare"/>
-      <field length="7" name="IEI"/>
-      <field length="4" name="MCCDigit2"/>
-      <field length="4" name="MCCDigit1"/>
-      <field length="4" name="MNCDigit3"/>
-      <field length="4" name="MCCDigit3"/>
-      <field length="4" name="MNCDigit2"/>
-      <field length="4" name="MNCDigit1"/>
-      <field length="16" name="LAC" type="#xxx"/>
-    </record>
-  </fragment>
-  <fragment id="MobileIdentity">
-    <!-- 9.9.2.3 (TS 24.008 10.5.1.4)-->
+
+  <!-- TS 24.008 10.5.1.4 -->
+  <fragment id="MobileIdentity1_LV">
     <record name="MobileIdentity">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <field length="4" name="Digit1"/>
+        <field length="1" name="Odd_Even_Indic"/>
+        <field length="3" name="IdentityType"/>
+        <repeat>
+          <field length="4" name="Digit"/>
+        </repeat>
+      </record>
     </record>
   </fragment>
-  <fragment id="MSIdentity">
+  <fragment id="MobileIdentity2_LV">
+    <record name="MobileIdentity">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <field length="2" name="Spare"/>
+        <field length="1" name="MBMS_SessionID_Indic"/>
+        <field length="1" name="MCC_MNC_Indic"/>
+        <field length="1" name="Odd_Even_Indic"/>
+        <field length="3" name="IdentityType"/>
+        <field length="24" name="MBMS Service ID"/>
+        <if expr="MCC_MNC_Indic">
+          <field length="4" name="MCCDigit2"/>
+          <field length="4" name="MCCDigit1"/>
+          <field length="4" name="MNCDigit3"/>
+          <field length="4" name="MCCDigit3"/>
+          <field length="4" name="MNCDigit2"/>
+          <field length="4" name="MNCDigit1"/>
+        </if>
+        <if expr="MBMS_SessionID_Indic">
+          <field length="8" name="MBMS Session ID"/>
+        </if>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- 9.9.2.3 -->
+  <fragment id="MSIdentity_LV">
     <record name="MSIdentity">
-      <fragment href="#MobileIdentity"/>
+      <fragment href="#MobileIdentity1_LV"/>
     </record>
   </fragment>
-  <fragment id="EMMCause">
-    <!-- 9.9.3.9 -->
+
+  <!-- 9.9.3.9 -->
+  <fragment id="EMMCause_V">
     <record name="EMMCause">
-      <field length="8" name="IEI"/>
-      <field length="8" name="CauseValue" type="#xxx"/>
+      <field length="8" name="Cause" type="#xxx"/>
     </record>
   </fragment>
-  <fragment id="T3402value">
-    <record name="T3402value">
-      <fragment href="#GPRSTimer"/>
-    </record>
-  </fragment>
-  <fragment id="T3423value">
-    <record name="T3423value">
-      <fragment href="#GPRSTimer"/>
-    </record>
-  </fragment>
-  <fragment id="PLMNList">
-    <!-- 9.9.2.8 (TS 24.008 10.5.1.13)-->
+
+  <!-- TS 24.008 10.5.1.13 -->
+  <fragment id="PLMNList_LV">
     <record name="PLMNList">
-      <field length="xxx" name="xxx" type="#xxx"/>
+      <field length="8" name="Length" type="#xxx"/>
+      <record name="Contents" length="8 * Length">
+        <repeat>
+          <field length="4" name="MCCDigit2"/>
+          <field length="4" name="MCCDigit1"/>
+          <field length="4" name="MNCDigit3"/>
+          <field length="4" name="MCCDigit3"/>
+          <field length="4" name="MNCDigit2"/>
+          <field length="4" name="MNCDigit1"/>
+        </repeat>
+      </record>
     </record>
   </fragment>
-  <fragment id="EquivalentPLMNs">
+  <!-- 9.9.2.8 -->
+  <fragment id="EquivalentPLMNs_LV">
     <record name="EquivalentPLMNs">
-      <fragment href="#PLMNList"/>
+      <fragment href="#PLMNList_LV"/>
     </record>
   </fragment>
-  <fragment id="EmergencyNumberList">
-    <!-- 9.9.3.37 -->
+
+  <!-- 9.9.3.37 (TS 24.008 10.5.3.13)-->
+  <fragment id="EmergencyNumberList_LV">
     <record name="EmergencyNumberList">
-      <field length="xxx" name="xxx" type="#xxx"/>
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <repeat>
+          <field length="8" name="Length"/>
+          <field length="3" name="Spare"/>
+          <field length="5" name="Emergency Service Catagory" type="#xxx"/>
+          <record name="NumberList" length="8 * Length">
+            <repeat>
+              <field length="4" name="Digit"/>
+            </repeat>
+          </record>
+          <if expr="Length &amp; 0x1">
+              <field length="4" name="End Mark"/>
+          </if>
+        </repeat>
+      </record>
     </record>
   </fragment>
 
-  <!-- MESSAGE FRAGMENTS -->
-  <fragment id="AttachAccept" name="ATTACH ACCEPT">
-    <fragment href="#EPSAttachResult"/>
-    <fragment href="#SpareHalfOctet"/>
-    <fragment href="#T3412value"/>
-    <fragment href="#TAIList"/>
-    <fragment href="#ESMMessageContainer"/>
-    <fragment href="#GUTI"/>
-    <fragment href="#LocationAreaIdentification"/>
-    <fragment href="#MSIdentity"/>
-    <fragment href="#EMMCause"/>
-    <fragment href="#T3402value"/>
-    <fragment href="#T3423value"/>
-    <fragment href="#EquivalentPLMNs"/>
-    <fragment href="#EmergencyNumberList"/>
+  <fragment id="OptionalElements">
+    <repeat name="Optional Elements">
+      <field length="8" name="IEI"/>
+      <switch expr="IEI">
+        <case value="0x50">
+          <fragment href="#EPSMobileIdentityGUTI_LV"/>
+        </case>
+        <case value="0x13">
+          <fragment href="#LocationAreaIdentification_V"/>
+        </case>
+        <case value="0x23">
+          <fragment href="#MSIdentity_LV"/>
+        </case>
+        <case value="0x53">
+          <fragment href="#EMMCause_V"/>
+        </case>
+        <case value="0x17">
+          <fragment href="#T3402value_V"/>
+        </case>
+        <case value="0x59">
+          <fragment href="#T3423value_V"/>
+        </case>
+        <case value="0x4A">
+          <fragment href="#EquivalentPLMNs_LV"/>
+        </case>
+        <case value="0x34">
+          <fragment href="#EmergencyNumberList_LV"/>
+        </case>
+      </switch>
+    </repeat>
   </fragment>
 
+  <!-- STRUCTURE -->
   <structure>
     <oob>
       <prop name="Name" value="999" type="#MessageType"/>
@@ -290,105 +388,115 @@
     <fragment href="#SecurityHeaderType"/>
     <fragment href="#MessageType"/>
     <switch expr="MessageType">
-      <case value="0b01000001">
+      <case value="0b01000001"> <!-- Attach request 0x41 -->
+        <field length="8" name="Dummy"/>
       </case>
-      <case value="0b01000010">
+      <case value="0b01000010"> <!-- Attach accept 0x42 -->
+        <fragment href="#EPSAttachResult_V"/>
+        <fragment href="#SpareHalfOctet"/>
+        <fragment href="#T3412value_V"/>
+        <fragment href="#TAIList_LV"/>
+        <fragment href="#ESMMessageContainer_LVE"/>
+        <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01000011">
+      <case value="0b01000011"> <!-- Attach complete 0x43 -->
+        <fragment href="#ESMMessageContainer_LVE"/>
       </case>
-      <case value="0b01000100">
+      <case value="0b01000100"> <!-- Attach reject 0x44 -->
+        <fragment href="#EMMCause_V"/>
+        <fragment href="#ESMMessageContainer_TLVE"/>
       </case>
-      <case value="0b01000101">
+      <case value="0b01000101"> <!-- Detach request -->
       </case>
-      <case value="0b01000110">
+      <case value="0b01000110"> <!-- Detach accept -->
       </case>
-      <case value="0b01001000">
+      <case value="0b01001000"> <!-- Tracking area update request -->
       </case>
-      <case value="0b01001001">
+      <case value="0b01001001"> <!-- Tracking area update accept -->
       </case>
-      <case value="0b01001010">
+      <case value="0b01001010"> <!-- Tracking area update complete -->
       </case>
-      <case value="0b01001011">
+      <case value="0b01001011"> <!-- Tracking area update reject -->
       </case>
-      <case value="0b01001100">
+      <case value="0b01001100"> <!-- Extended service request -->
       </case>
-      <case value="0b01001110">
+      <case value="0b01001110"> <!-- Service reject -->
       </case>
-      <case value="0b01010000">
+      <case value="0b01010000"> <!-- GUTI reallocation command -->
       </case>
-      <case value="0b01010001">
+      <case value="0b01010001"> <!-- GUTI reallocation complete -->
       </case>
-      <case value="0b01010010">
+      <case value="0b01010010"> <!-- Authentication request -->
       </case>
-      <case value="0b01010011">
+      <case value="0b01010011"> <!-- Authentication response -->
       </case>
-      <case value="0b01010100">
+      <case value="0b01010100"> <!-- Authentication reject -->
       </case>
-      <case value="0b01011100">
+      <case value="0b01011100"> <!-- Authentication failure -->
       </case>
-      <case value="0b01010101">
+      <case value="0b01010101"> <!-- Identity request -->
       </case>
-      <case value="0b01010110">
+      <case value="0b01010110"> <!-- Identity response -->
       </case>
-      <case value="0b01011101">
+      <case value="0b01011101"> <!-- Security mode command -->
       </case>
-      <case value="0b01011110">
+      <case value="0b01011110"> <!-- Security mode complete -->
       </case>
-      <case value="0b01011111">
+      <case value="0b01011111"> <!-- Security mode reject -->
       </case>
-      <case value="0b01100000">
+      <case value="0b01100000"> <!-- EMM status -->
       </case>
-      <case value="0b01100001">
+      <case value="0b01100001"> <!-- EMM information -->
       </case>
-      <case value="0b01100010">
+      <case value="0b01100010"> <!-- Downlink NAS transport -->
       </case>
-      <case value="0b01100011">
+      <case value="0b01100011"> <!-- Uplink NAS transport -->
       </case>
-      <case value="0b01100100">
+      <case value="0b01100100"> <!-- CS Service notification -->
       </case>
-      <case value="0b11000001">
+      <case value="0b11000001"> <!-- Activate default EPS bearer context request -->
       </case>
-      <case value="0b11000010">
+      <case value="0b11000010"> <!-- Activate default EPS bearer context accept -->
       </case>
-      <case value="0b11000011">
+      <case value="0b11000011"> <!-- Activate default EPS bearer context reject -->
       </case>
-      <case value="0b11000101">
+      <case value="0b11000101"> <!-- Activate dedicated EPS bearer context request -->
       </case>
-      <case value="0b11000110">
+      <case value="0b11000110"> <!-- Activate dedicated EPS bearer context accept -->
       </case>
-      <case value="0b11000111">
+      <case value="0b11000111"> <!-- Activate dedicated EPS bearer context reject -->
       </case>
-      <case value="0b11001001">
+      <case value="0b11001001"> <!-- Modify EPS bearer context request -->
       </case>
-      <case value="0b11001010">
+      <case value="0b11001010"> <!-- Modify EPS bearer context accept -->
       </case>
-      <case value="0b11001011">
+      <case value="0b11001011"> <!-- Modify EPS bearer context reject -->
       </case>
-      <case value="0b11001101">
+      <case value="0b11001101"> <!-- Deactivate EPS bearer context request -->
       </case>
-      <case value="0b11001110">
+      <case value="0b11001110"> <!-- Deactivate EPS bearer context accept -->
       </case>
-      <case value="0b11010000">
+      <case value="0b11010000"> <!-- PDN connectivity request -->
       </case>
-      <case value="0b11010001">
+      <case value="0b11010001"> <!-- PDN connectivity reject -->
       </case>
-      <case value="0b11010010">
+      <case value="0b11010010"> <!-- PDN disconnect request -->
       </case>
-      <case value="0b11010011">
+      <case value="0b11010011"> <!-- PDN disconnect reject -->
       </case>
-      <case value="0b11010100">
+      <case value="0b11010100"> <!-- Bearer resource allocation request -->
       </case>
-      <case value="0b11010101">
+      <case value="0b11010101"> <!-- Bearer resource allocation reject -->
       </case>
-      <case value="0b11010110">
+      <case value="0b11010110"> <!-- Bearer resource modification request -->
       </case>
-      <case value="0b11010111">
+      <case value="0b11010111"> <!-- Bearer resource modification reject -->
       </case>
-      <case value="0b11011001">
+      <case value="0b11011001"> <!-- ESM information request -->
       </case>
-      <case value="0b11011010">
+      <case value="0b11011010"> <!-- ESM information response -->
       </case>
-      <case value="0b11101000">
+      <case value="0b11101000"> <!-- ESM status -->
       </case>
     </switch>
   </structure>
