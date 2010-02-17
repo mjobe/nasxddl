@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<xddl version="2.0000" >
+  <type id="xxx">
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+  <type id="zero">
+    <enum>
+      <item key="0" value="zero"/>
+    </enum>
+  </type>
+
+  <type id="ProtocolDiscriminator">
+    <comment>24.007 version 8.2.0 Release 8, p 100, Table 11.2</comment>
+    <enum>
+      <item key="0b0000" value="group call control"/>
+      <item key="0b0001" value="broadcast call control"/>
+      <item key="0b0010" value="EPS session management messages"/>
+      <item key="0b0011" value="call control; call related SS messages"/>
+      <item key="0b0100" value="GPRS Transparent Transport Protocol (GTTP)"/>
+      <item key="0b0101" value="mobility management messages"/>
+      <item key="0b0110" value="radio resources management messages"/>
+      <item key="0b0111" value="EPS mobility management messages"/>
+      <item key="0b1000" value="GPRS mobility management messages"/>
+      <item key="0b1001" value="SMS messages"/>
+      <item key="0b1010" value="GPRS session management messages"/>
+      <item key="0b1011" value="non call related SS messages"/>
+      <item key="0b1100" value="Location services specified in 3GPP TS 44.071 [8a]"/>
+      <item key="0b1110" value="reserved for extension of the PD to one octet length"/>
+      <item key="0b1111" value="used by tests procedures described in 3GPP TS 44.014 [5a], 3GPP TS 34.109 [17a] and 3GPP TS 36.509 [26]."/>
+    </enum>
+  </type>
+
+  <type id="9.3.1">
+    <comment>9.3.1: Security header type</comment>
+    <enum>
+      <item key="0b0000" value="Plain NAS message, not security protected"/>
+      <item key="0b0001" value="Integrity protected"/>
+      <item key="0b0010" value="Integrity protected and ciphered"/>
+      <item key="0b0011" value="Integrity protected with new EPS security context (NOTE 1)"/>
+      <item key="0b0100" value="Integrity protected and ciphered with new EPS security context (NOTE 2)"/>
+      <range start="0b1101" end="Ob1111" value="These values are not used in this version of the protocol."/>
+    </enum>
+  </type>
+
+  <type id="9.8.1">
+    <comment>9.8.1: Message types for EPS mobility management</comment>
+    <enum>
+      <item key="0b01000001" value="Attach request"/>
+      <item key="0b01000010" value="Attach accept"/>
+      <item key="0b01000011" value="Attach complete"/>
+      <item key="0b01000100" value="Attach reject"/>
+      <item key="0b01000101" value="Detach request"/>
+      <item key="0b01000110" value="Detach accept"/>
+      <item key="0b01001000" value="Tracking area update request"/>
+      <item key="0b01001001" value="Tracking area update accept"/>
+      <item key="0b01001010" value="Tracking area update complete"/>
+      <item key="0b01001011" value="Tracking area update reject"/>
+      <item key="0b01001100" value="Extended service request"/>
+      <item key="0b01001110" value="Service reject"/>
+      <item key="0b01010000" value="GUTI reallocation command"/>
+      <item key="0b01010001" value="GUTI reallocation complete"/>
+      <item key="0b01010010" value="Authentication request"/>
+      <item key="0b01010011" value="Authentication response"/>
+      <item key="0b01010100" value="Authentication reject"/>
+      <item key="0b01011100" value="Authentication failure"/>
+      <item key="0b01010101" value="Identity request"/>
+      <item key="0b01010110" value="Identity response"/>
+      <item key="0b01011101" value="Security mode command"/>
+      <item key="0b01011110" value="Security mode complete"/>
+      <item key="0b01011111" value="Security mode reject"/>
+      <item key="0b01100000" value="EMM status"/>
+      <item key="0b01100001" value="EMM information"/>
+      <item key="0b01100010" value="Downlink NAS transport"/>
+      <item key="0b01100011" value="Uplink NAS transport"/>
+      <item key="0b01100100" value="CS Service notification"/>
+      <item key="0b11000001" value="Activate default EPS bearer context request"/>
+      <item key="0b11000010" value="Activate default EPS bearer context accept"/>
+      <item key="0b11000011" value="Activate default EPS bearer context reject"/>
+      <item key="0b11000101" value="Activate dedicated EPS bearer context request"/>
+      <item key="0b11000110" value="Activate dedicated EPS bearer context accept"/>
+      <item key="0b11000111" value="Activate dedicated EPS bearer context reject"/>
+      <item key="0b11001001" value="Modify EPS bearer context request"/>
+      <item key="0b11001010" value="Modify EPS bearer context accept"/>
+      <item key="0b11001011" value="Modify EPS bearer context reject"/>
+      <item key="0b11001101" value="Deactivate EPS bearer context request"/>
+      <item key="0b11001110" value="Deactivate EPS bearer context accept"/>
+      <item key="0b11010000" value="PDN connectivity request"/>
+      <item key="0b11010001" value="PDN connectivity reject"/>
+      <item key="0b11010010" value="PDN disconnect request"/>
+      <item key="0b11010011" value="PDN disconnect reject"/>
+      <item key="0b11010100" value="Bearer resource allocation request"/>
+      <item key="0b11010101" value="Bearer resource allocation reject"/>
+      <item key="0b11010110" value="Bearer resource modification request"/>
+      <item key="0b11010111" value="Bearer resource modification reject"/>
+      <item key="0b11011001" value="ESM information request"/>
+      <item key="0b11011010" value="ESM information response"/>
+      <item key="0b11101000" value="ESM status"/>
+    </enum>
+  </type>
+
+  <type id="9.9.2.1.1-a">
+    <comment>EPS bearer context status information element</comment>
+    <enum>
+      <item key="0" value="spare"/>
+    </enum>
+  </type>
+
+  <type id="9.9.2.1.1-b">
+    <comment>EPS bearer context status information element</comment>
+    <enum>
+      <item key="0" value="BEARER CONTEXT-INACTIVE"/>
+      <item key="1" value="BEARER CONTEXT-ACTIVE"/>
+    </enum>
+  </type>
+
+
+  <type id="EPSAttachResult">
+    <!-- 9.9.3.10 -->
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+  <type id="EPSAttachResultValue">
+    <!-- 9.9.3.10 -->
+    <enum>
+      <item key="0" value="description"/>
+    </enum>
+  </type>
+</xddl>
