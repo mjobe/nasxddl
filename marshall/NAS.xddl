@@ -88,6 +88,9 @@
   </type>
 
   <!-- IE FRAGMENTS -->
+  <fragment id="Empty">
+    <field length="0" name="Spare"/>
+  </fragment>
   <fragment id="ProtocolDiscriminator">
     <!-- 9.2 -->
     <record name="Protocol Discriminator">
@@ -201,19 +204,12 @@
       <field length="8 * Length" name="ESMMessage"/>
     </record>
   </fragment>
-  <fragment id="ESMMessageContainer_TLVE">
-    <record name="ESM Message Container">
-      <field length="8" name="IEI"/>
-      <field length="16" name="Length"/>
-      <field length="8 * Length" name="ESMMessage"/>
-    </record>
-  </fragment>
 
   <!-- 9.9.3.12 -->
   <fragment id="EPSMobileIdentityGUTI_VOnly">
     <field length="4" name="Spare"/>
     <field length="1" name="Odd_Even_Indic"/>
-    <field length="3" name="IdentityType"/>
+    <field length="3" name="IdentityType" type="#xxx"/>
     <field length="4" name="MCCDigit2"/>
     <field length="4" name="MCCDigit1"/>
     <field length="4" name="MNCDigit3"/>
@@ -234,64 +230,63 @@
   </fragment>
 
   <!-- 9.9.2.2 (TS 24.008 10.5.1.3)-->
-  <fragment id="LocationAreaIdentification_VOnly">
-    <field length="4" name="MCCDigit2"/>
-    <field length="4" name="MCCDigit1"/>
-    <field length="4" name="MNCDigit3"/>
-    <field length="4" name="MCCDigit3"/>
-    <field length="4" name="MNCDigit2"/>
-    <field length="4" name="MNCDigit1"/>
-    <field length="16" name="LAC" type="#xxx"/>
-  </fragment>
   <fragment id="LocationAreaIdentification_V">
     <record name="LocationAreaIdentification">
-      <fragment href="#LocationAreaIdentification_VOnly"/>
+      <field length="4" name="MCCDigit2"/>
+      <field length="4" name="MCCDigit1"/>
+      <field length="4" name="MNCDigit3"/>
+      <field length="4" name="MCCDigit3"/>
+      <field length="4" name="MNCDigit2"/>
+      <field length="4" name="MNCDigit1"/>
+      <field length="16" name="LAC" type="#xxx"/>
     </record>
   </fragment>
 
   <!-- TS 24.008 10.5.1.4 -->
-  <fragment id="MobileIdentity1_LV">
+  <fragment id="MobileIdentity_LV">
     <record name="MobileIdentity">
       <field length="8" name="Length"/>
       <record name="Contents" length="8 * Length">
-        <field length="4" name="Digit1"/>
-        <field length="1" name="Odd_Even_Indic"/>
-        <field length="3" name="IdentityType"/>
-        <repeat>
-          <field length="4" name="Digit"/>
-        </repeat>
-      </record>
-    </record>
-  </fragment>
-  <fragment id="MobileIdentity2_LV">
-    <record name="MobileIdentity">
-      <field length="8" name="Length"/>
-      <record name="Contents" length="8 * Length">
-        <field length="2" name="Spare"/>
-        <field length="1" name="MBMS_SessionID_Indic"/>
-        <field length="1" name="MCC_MNC_Indic"/>
-        <field length="1" name="Odd_Even_Indic"/>
-        <field length="3" name="IdentityType"/>
-        <field length="24" name="MBMS Service ID"/>
-        <if expr="MCC_MNC_Indic">
-          <field length="4" name="MCCDigit2"/>
-          <field length="4" name="MCCDigit1"/>
-          <field length="4" name="MNCDigit3"/>
-          <field length="4" name="MCCDigit3"/>
-          <field length="4" name="MNCDigit2"/>
-          <field length="4" name="MNCDigit1"/>
+        <if expr="Length >= 6">
+          <field length="2" name="Spare"/>
+          <field length="1" name="MBMS_SessionID_Indic"/>
+          <field length="1" name="MCC_MNC_Indic"/>
+          <field length="1" name="Odd_Even_Indic"/>
+          <field length="3" name="IdentityType"/>
+          <field length="24" name="MBMS Service ID"/>
+          <if expr="MCC_MNC_Indic">
+            <field length="4" name="MCCDigit2"/>
+            <field length="4" name="MCCDigit1"/>
+            <field length="4" name="MNCDigit3"/>
+            <field length="4" name="MCCDigit3"/>
+            <field length="4" name="MNCDigit2"/>
+            <field length="4" name="MNCDigit1"/>
+          </if>
+          <if expr="MBMS_SessionID_Indic">
+            <field length="8" name="MBMS Session ID"/>
+          </if>
         </if>
-        <if expr="MBMS_SessionID_Indic">
-          <field length="8" name="MBMS Session ID"/>
+        <if expr="Length < 6">
+          <field length="4" name="Digit1"/>
+          <field length="1" name="Odd_Even_Indic"/>
+          <field length="3" name="IdentityType"/>
+          <field length="4" name="DigitP1"/>
+          <field length="4" name="DigitP"/>
         </if>
       </record>
     </record>
   </fragment>
 
+
   <!-- 9.9.2.3 -->
   <fragment id="MSIdentity_LV">
     <record name="MSIdentity">
-      <fragment href="#MobileIdentity1_LV"/>
+      <fragment href="#MobileIdentity_LV"/>
+    </record>
+  </fragment>
+  <fragment id="IMEISV_LV">
+    <record name="IMEISV">
+      <fragment href="#MobileIdentity_LV"/>
     </record>
   </fragment>
 
@@ -347,35 +342,541 @@
     </record>
   </fragment>
 
+  <!-- 9.9.3.11 (1/2) -->
+  <fragment id="EPSAttachType_V">
+    <record name="EPSAttachType">
+      <field length="1" name="Spare"/>
+      <field length="3" name="EPSAttachType"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.21 (1/2) -->
+  <fragment id="DetachType_V">
+    <record name="Detach Type">
+      <field length="1" name="Switch Off" type="#xxx" />
+      <field length="3" name="Detach Type" type="#xxx" />
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.21 (1/2) -->
+  <fragment id="NASKeySetIdentifier_V">
+    <record name="NASKeySetIdentifier">
+      <field length="1" name="TSC"/>
+      <field length="3" name="NASKeySetID"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.34 (3-14) -->
+  <fragment id="UENetworkCompatability_LV">
+    <record name="UE Network Compatability">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+
+        <!-- Byte 1 (octet 3) -->
+        <record name="EEA">
+          <field length="1" name="128-EEA0"/>
+          <field length="1" name="128-EEA1"/>
+          <field length="1" name="128-EEA2"/>
+          <field length="1" name="EEA3"/>
+          <field length="1" name="EEA4"/>
+          <field length="1" name="EEA5"/>
+          <field length="1" name="EEA6"/>
+          <field length="1" name="EEA7"/>
+        </record>
+
+        <!-- Byte 2 (octet 4) -->
+        <record name="EIA">
+          <field length="1" name="Spare"/>
+          <field length="1" name="128-EIA1"/>
+          <field length="1" name="128-EIA2"/>
+          <field length="1" name="EIA3"/>
+          <field length="1" name="EIA4"/>
+          <field length="1" name="EIA5"/>
+          <field length="1" name="EIA6"/>
+          <field length="1" name="EIA7"/>
+        </record>
+
+        <!-- Byte 3 (octet 5*) -->
+        <if expr="Length >= 3">
+          <record name="UEA">
+            <field length="1" name="UEA0"/>
+            <field length="1" name="UEA1"/>
+            <field length="1" name="UEA2"/>
+            <field length="1" name="UEA3"/>
+            <field length="1" name="UEA4"/>
+            <field length="1" name="UEA5"/>
+            <field length="1" name="UEA6"/>
+            <field length="1" name="UEA7"/>
+          </record>
+        </if>
+
+        <!-- Byte 4 (octet 6*) -->
+        <if expr="Length >= 4">
+          <record name="UCS/UIA">
+            <field length="1" name="UCS2"/>
+            <field length="1" name="UIA1"/>
+            <field length="1" name="UIA2"/>
+            <field length="1" name="UIA3"/>
+            <field length="1" name="UIA4"/>
+            <field length="1" name="UIA5"/>
+            <field length="1" name="UIA6"/>
+            <field length="1" name="UIA7"/>
+          </record>
+        </if>
+
+        <!-- Byte 5 (octet 7*) -->
+        <if expr="Length >= 5">
+          <record name="1xSR">
+            <field length="1" name="Spare"/>
+            <field length="1" name="Spare"/>
+            <field length="1" name="Spare"/>
+            <field length="1" name="Spare"/>
+            <field length="1" name="Spare"/>
+            <field length="1" name="Spare"/>
+            <field length="1" name="1xSR-VCC"/>
+            <field length="1" name="Spare"/>
+          </record>
+        </if>
+
+        <!-- Byte 6+ (octet 8*-15*) -->
+        <record name="Spare">
+          <if expr="Length >= 6">
+            <repeat>
+              <field length="1" name="Spare"/>
+              <field length="1" name="Spare"/>
+              <field length="1" name="Spare"/>
+              <field length="1" name="Spare"/>
+              <field length="1" name="Spare"/>
+              <field length="1" name="Spare"/>
+              <field length="1" name="Spare"/>
+              <field length="1" name="Spare"/>
+            </repeat>
+          </if>
+        </record>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- TS 24.008 10.5.5.8 (4) -->
+  <fragment id="P_TMSI_Signature_V">
+    <record name="P-TMSI Signature">
+      <field length="8 * 3" name="Value"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.32 (6) -->
+  <fragment id="TrackingAreaIdentity_V">
+    <record name="TrackingAreaIdentity">
+      <field length="4" name="MCCDigit2"/>
+      <field length="4" name="MCCDigit1"/>
+      <field length="4" name="MNCDigit3"/>
+      <field length="4" name="MCCDigit3"/>
+      <field length="4" name="MNCDigit2"/>
+      <field length="4" name="MNCDigit1"/>
+      <field length="16" name="TAC"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.8 (3) (TS 24.008 10.5.5.6)-->
+  <fragment id="DRXParameter_V">
+    <record name="DRX Parameter">
+      <field length="8" name="SPLIT PG CYCLE CODE"/>
+      <field length="4" name="CN Cycle Length Coefficient and Value for S1 Mode"/>
+      <field length="1" name="SPLIT on CCCH"/>
+      <field length="3" name="Non-DRX Timer"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.20 (4-10) (TS 24.008 10.5.5.12)-->
+  <fragment id="MSNetworkCapability_LV">
+    <record name="MSNetworkCapability">
+      <field length="8" name="Length"/>
+      <!-- This needs to be broken down further (ASN.1 style) -->
+      <field length="8 * Length" name="Value"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.31 (1) (TS 24.008 10.5.5.4) -->
+  <fragment id="TMSIStatus_V">
+    <record name="TMSIStatus">
+      <field length="3" name="Spare"/>
+      <field length="1" name="TMSI Flag" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.2.4 (5) (TS 24.008 10.5.1.6) -->
+  <fragment id="MobileStationClassmark2_LV">
+    <record name="MobileStationClassmark2">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <field length="1" name="Spare"/>
+        <field length="2" name="Revision Level"/>
+        <field length="1" name="ES IND"/>
+        <field length="1" name="A5/1"/>
+        <field length="3" name="RF Power Capability"/>
+
+        <field length="1" name="Spare"/>
+        <field length="1" name="PS Capability"/>
+        <field length="2" name="SS Screen Indicator"/>
+        <field length="1" name="SM Capability"/>
+        <field length="1" name="VBS"/>
+        <field length="1" name="VGCS"/>
+        <field length="1" name="FC"/>
+
+        <field length="1" name="CM3"/>
+        <field length="1" name="Spare"/>
+        <field length="1" name="LCSVA Capability"/>
+        <field length="1" name="UCS2"/>
+        <field length="1" name="SoLSA"/>
+        <field length="1" name="CMSP"/>
+        <field length="1" name="A5/3"/>
+        <field length="1" name="A5/2"/>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- 9.9.2.5 (2-34) (TS 24.008 10.5.1.7) -->
+  <fragment id="MobileStationClassmark3_LV">
+    <record name="MobileStationClassmark3">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <field length="8 * Length" name="TBD"/>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- 9.9.2.10 (5-n) (TS 24.008 10.5.4.32) -->
+  <fragment id="SupportedCodecList_LV">
+    <record name="SupportedCodecList">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <repeat name="Codec List">
+          <field length="8" name="System Identification" type="#xxx"/>
+          <field length="8" name="BitmapLength"/>
+          <record name="Bitmap" length="8 * BitmapLength">
+            <repeat>
+              <field length="8" name="CodecBitmapPart1" type="#xxx"/>
+              <field length="8" name="CodecBitmapPart2" type="#xxx"/>
+            </repeat>
+          </record>
+        </repeat>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.3 (16) (TS 24.008 10.5.3.1) -->
+  <fragment id="AuthParamRAND_V">
+    <record name="Authentication Paramter RAND">
+      <field length="8 * 16" name="RAND"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.2 (17) -->
+  <!-- 24.008 TS 10.5.3.1.1 -->
+  <fragment id="AuthParamAUTN_LV">
+    <record name="Authentication Paramter AUTN">
+      <field length="8" name="Length"/>
+      <field length="8 * Length" name="AUTN"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.4 (5-17) -->
+  <fragment id="AuthResponseParam_LV">
+    <record name="Authentication Paramter AUTN">
+      <field length="8" name="Length"/>
+      <field length="8 * Length" name="RES"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.23 (1) -->
+  <fragment id="NASSecurityAlgorithms_V">
+    <record name="NAS Security Algorithms">
+      <field length="1" name="Spare"/>
+      <field length="3" name="Cipher Algorithm Type"/>
+      <field length="1" name="Spare"/>
+      <field length="3" name="Integrity Protection Algorithm Type"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.36 (3-6) -->
+  <fragment id="UESecurityCapability_LV">
+    <record name="UE Security Capability">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+
+        <!-- Byte 1 (octet 3) -->
+        <record name="EEA">
+          <field length="1" name="128-EEA0"/>
+          <field length="1" name="128-EEA1"/>
+          <field length="1" name="128-EEA2"/>
+          <field length="1" name="EEA3"/>
+          <field length="1" name="EEA4"/>
+          <field length="1" name="EEA5"/>
+          <field length="1" name="EEA6"/>
+          <field length="1" name="EEA7"/>
+        </record>
+
+        <!-- Byte 2 (octet 4) -->
+        <record name="EIA">
+          <field length="1" name="Spare"/>
+          <field length="1" name="128-EIA1"/>
+          <field length="1" name="128-EIA2"/>
+          <field length="1" name="EIA3"/>
+          <field length="1" name="EIA4"/>
+          <field length="1" name="EIA5"/>
+          <field length="1" name="EIA6"/>
+          <field length="1" name="EIA7"/>
+        </record>
+
+        <!-- Byte 3 (octet 5*) -->
+        <if expr="Length >= 3">
+          <record name="UEA">
+            <field length="1" name="UEA0"/>
+            <field length="1" name="UEA1"/>
+            <field length="1" name="UEA2"/>
+            <field length="1" name="UEA3"/>
+            <field length="1" name="UEA4"/>
+            <field length="1" name="UEA5"/>
+            <field length="1" name="UEA6"/>
+            <field length="1" name="UEA7"/>
+          </record>
+        </if>
+
+        <!-- Byte 4 (octet 6*) -->
+        <if expr="Length >= 4">
+          <record name="UIA">
+            <field length="1" name="Spare"/>
+            <field length="1" name="UIA1"/>
+            <field length="1" name="UIA2"/>
+            <field length="1" name="UIA3"/>
+            <field length="1" name="UIA4"/>
+            <field length="1" name="UIA5"/>
+            <field length="1" name="UIA6"/>
+            <field length="1" name="UIA7"/>
+          </record>
+        </if>
+
+        <!-- Byte 5 (octet 7*) -->
+        <if expr="Length >= 5">
+          <record name="UIA">
+            <field length="1" name="Spare"/>
+            <field length="1" name="GEA1"/>
+            <field length="1" name="GEA2"/>
+            <field length="1" name="GEA3"/>
+            <field length="1" name="GEA4"/>
+            <field length="1" name="GEA5"/>
+            <field length="1" name="GEA6"/>
+            <field length="1" name="GEA7"/>
+          </record>
+        </if>
+
+      </record>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.18 (1) (TS 24.008 10.5.5.10) -->
+  <fragment id="IMEISV_Request_V">
+    <record name="IMEISV Request">
+      <field length="1" name="Spare"/>
+      <field length="3" name="Value"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.25 (5) -->
+  <fragment id="Nonce">
+    <record name="Nonce">
+      <field length="8 * 4" name="Value"/>
+    </record>
+  </fragment>
+  <fragment id="ReplayedNonce">
+    <record name="Nonce">
+      <field length="8 * 4" name="Value"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.1 (16) (TS 24.008 10.5.3.2.2) -->
+  <fragment id="AuthenticationFailureParam_LV">
+    <record name="Authentication Failure Parameter">
+      <field length="8" name="Length"/>
+      <field length="8 * Length" name="Authentication Failure Parameter"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.38 (3-12) -->
+  <fragment id="CLI_LV">
+    <record name="CLI">
+      <field length="8" name="Length"/>
+      <field length="8 * Length" name="Value" type="#xxx" />
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.39 (2) -->
+  <fragment id="SSCode_V">
+    <record name="SS Code">
+      <field length="8" name="SS Code" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.40 (2) -->
+  <fragment id="LCSIndicator_V">
+    <record name="LCS Indicator">
+      <field length="8" name="LCS Indicator" type="#xxx" />
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.41 (3-257) -->
+  <fragment id="LCSClientIdentity_LV">
+    <record name="LCS Client Identity">
+      <field length="8" name="Length"/>
+      <field length="8 * Length" name="Value" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.22 (3-252) -->
+  <fragment id="NASMessageContainer_LV">
+    <record name="NAS Message Container">
+      <field length="8" name="Length"/>
+      <field length="8 * Length" name="Value" type="#xxx"/>
+    </record>
+  </fragment>
+
   <fragment id="OptionalElements">
     <repeat name="Optional Elements">
-      <field length="8" name="IEI"/>
-      <switch expr="IEI">
-        <case value="0x50">
-          <fragment href="#EPSMobileIdentityGUTI_LV"/>
+      <field length="1" name="ShortIEIBit"/>
+      <switch expr="ShortIEIBit">
+        <case value="1">
+          <field length="3" name="IEI"/>
+          <switch expr="IEI">
+            <case value="0b001"> <!-- 0x9 -->
+              <fragment href="#TMSIStatus_V"/>
+            </case>
+            <case value="0b100"> <!-- 0xC -->
+              <fragment href="#IMEISV_Request_V"/>
+            </case>
+          </switch>
         </case>
-        <case value="0x13">
-          <fragment href="#LocationAreaIdentification_V"/>
-        </case>
-        <case value="0x23">
-          <fragment href="#MSIdentity_LV"/>
-        </case>
-        <case value="0x53">
-          <fragment href="#EMMCause_V"/>
-        </case>
-        <case value="0x17">
-          <fragment href="#T3402value_V"/>
-        </case>
-        <case value="0x59">
-          <fragment href="#T3423value_V"/>
-        </case>
-        <case value="0x4A">
-          <fragment href="#EquivalentPLMNs_LV"/>
-        </case>
-        <case value="0x34">
-          <fragment href="#EmergencyNumberList_LV"/>
-        </case>
+        <default>
+          <field length="7" name="IEI"/>
+          <switch expr="IEI">
+            <case value="0x11">
+              <fragment href="#MobileStationClassmark2_LV"/>
+            </case>
+            <case value="0x13">
+                <switch expr="MessageType">
+                  <case value="0b01000001"> <!-- Attach Request -->
+                    <record name="OldLocationAreaIdentification">
+                      <fragment href="#LocationAreaIdentification_V"/>
+                    </record>
+                  </case>
+                  <default>
+                    <fragment href="#LocationAreaIdentification_V"/>
+                  </default>
+                </switch>
+            </case>
+            <case value="0x17">
+              <fragment href="#T3402value_V"/>
+            </case>
+            <case value="0x19">
+                <switch expr="MessageType">
+                  <case value="0b01000001"> <!-- Attach Request -->
+                    <record name="Old TMSI Signature">
+                      <fragment href="#P_TMSI_Signature_V"/>
+                    </record>
+                  </case>
+                  <default>
+                    <fragment href="#P_TMSI_Signature_V"/>
+                  </default>
+                </switch>
+            </case>
+            <case value="0x20">
+              <fragment href="#MobileStationClassmark3_LV"/>
+            </case>
+            <case value="0x23">
+                <switch expr="MessageType">
+                  <case value="0b01000010"> <!-- Attach Accept -->
+                    <fragment href="#MSIdentity_LV"/>
+                  </case>
+                  <case value="0b01011110"> <!-- Security Mode Complete -->
+                    <fragment href="#IMEISV_LV"/>
+                  </case>
+                  <default>
+                    <fragment href="#MobileIdentity_LV"/>
+                  </default>
+                </switch>
+            </case>
+            <case value="0x30">
+              <fragment href="#AuthenticationFailureParam_LV"/>
+            </case>
+            <case value="0x31">
+              <fragment href="#MSNetworkCapability_LV"/>
+            </case>
+            <case value="0x34">
+              <fragment href="#EmergencyNumberList_LV"/>
+            </case>
+            <case value="0x40">
+              <fragment href="#SupportedCodecList_LV"/>
+            </case>
+            <case value="0x4A">
+              <fragment href="#EquivalentPLMNs_LV"/>
+            </case>
+            <case value="0x50">
+                <switch expr="MessageType">
+                  <case value="0b01000001"> <!-- Attach Request -->
+                    <record name="Additional GUTI">
+                      <fragment href="#EPSMobileIdentityGUTI_LV"/>
+                    </record>
+                  </case>
+                  <default>
+                    <fragment href="#EPSMobileIdentityGUTI_LV"/>
+                  </default>
+                </switch>
+            </case>
+            <case value="0x52">
+                <switch expr="MessageType">
+                  <case value="0b01000001"> <!-- Attach Request -->
+                    <record name="Last Visited Registered TAI">
+                      <fragment href="#TrackingAreaIdentity_V"/>
+                    </record>
+                  </case>
+                  <default>
+                    <fragment href="#TrackingAreaIdentity_V"/>
+                  </default>
+                </switch>
+            </case>
+            <case value="0x53">
+              <fragment href="#EMMCause_V"/>
+            </case>
+            <case value="0x55">
+              <fragment href="#ReplayedNonce"/>
+            </case>
+            <case value="0x56">
+              <fragment href="#Nonce"/>
+            </case>
+            <case value="0x59">
+              <fragment href="#T3423value_V"/>
+            </case>
+            <case value="0x5C">
+              <fragment href="#DRXParameter_V"/>
+            </case>
+            <case value="0x60">
+              <fragment href="#CLI_LV"/>
+            </case>
+            <case value="0x61">
+              <fragment href="#SSCode_V"/>
+            </case>
+            <case value="0x62">
+              <fragment href="#LCSIndicator_V"/>
+            </case>
+            <case value="0x63">
+              <fragment href="#LCSClientIdentity_LV"/>
+            </case>
+            <case value="0x78">
+              <fragment href="#ESMMessageContainer_LVE"/>
+            </case>
+          </switch>
+        </default>
       </switch>
+
     </repeat>
   </fragment>
 
@@ -389,7 +890,12 @@
     <fragment href="#MessageType"/>
     <switch expr="MessageType">
       <case value="0b01000001"> <!-- Attach request 0x41 -->
-        <field length="8" name="Dummy"/>
+        <fragment href="#EPSAttachType_V"/>
+        <fragment href="#NASKeySetIdentifier_V"/>
+        <fragment href="#EPSMobileIdentityGUTI_LV"/>
+        <fragment href="#UENetworkCompatability_LV"/>
+        <fragment href="#ESMMessageContainer_LVE"/>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01000010"> <!-- Attach accept 0x42 -->
         <fragment href="#EPSAttachResult_V"/>
@@ -404,99 +910,159 @@
       </case>
       <case value="0b01000100"> <!-- Attach reject 0x44 -->
         <fragment href="#EMMCause_V"/>
-        <fragment href="#ESMMessageContainer_TLVE"/>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01000101"> <!-- Detach request -->
+        <fragment href="#DetachType_V"/>
+        <fragment href="#NASKeySetIdentifier_V"/>
+        <fragment href="#EPSMobileIdentityGUTI_LV"/>
       </case>
       <case value="0b01000110"> <!-- Detach accept -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01001000"> <!-- Tracking area update request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01001001"> <!-- Tracking area update accept -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01001010"> <!-- Tracking area update complete -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01001011"> <!-- Tracking area update reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01001100"> <!-- Extended service request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01001110"> <!-- Service reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01010000"> <!-- GUTI reallocation command -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01010001"> <!-- GUTI reallocation complete -->
+        <fragment href="#Empty"/>
       </case>
-      <case value="0b01010010"> <!-- Authentication request -->
+      <case value="0b01010010"> <!-- Authentication request 8.2.7 -->
+        <fragment href="#NASKeySetIdentifier_V"/>
+        <fragment href="#SpareHalfOctet"/>
+        <record name="EPS Challenge">
+          <fragment href="#AuthParamRAND_V"/>
+          <fragment href="#AuthParamAUTN_LV"/>
+        </record>
       </case>
-      <case value="0b01010011"> <!-- Authentication response -->
+      <case value="0b01010011"> <!-- Authentication response 8.2.8 -->
+        <fragment href="#AuthResponseParam_LV"/>
       </case>
       <case value="0b01010100"> <!-- Authentication reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01011100"> <!-- Authentication failure -->
+        <fragment href="#EMMCause_V"/>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01010101"> <!-- Identity request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01010110"> <!-- Identity response -->
+        <fragment href="#Empty"/>
       </case>
-      <case value="0b01011101"> <!-- Security mode command -->
+      <case value="0b01011101"> <!-- Security mode command 8.2.20 -->
+        <fragment href="#NASSecurityAlgorithms_V"/>
+        <fragment href="#NASKeySetIdentifier_V"/>
+        <fragment href="#SpareHalfOctet"/>
+        <record name="Replayed UE Security Capabilities">
+          <fragment href="#UESecurityCapability_LV"/>
+        </record>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01011110"> <!-- Security mode complete -->
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01011111"> <!-- Security mode reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01100000"> <!-- EMM status -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01100001"> <!-- EMM information -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01100010"> <!-- Downlink NAS transport -->
+        <fragment href="#NASMessageContainer_LV"/>
       </case>
       <case value="0b01100011"> <!-- Uplink NAS transport -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b01100100"> <!-- CS Service notification -->
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b11000001"> <!-- Activate default EPS bearer context request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11000010"> <!-- Activate default EPS bearer context accept -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11000011"> <!-- Activate default EPS bearer context reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11000101"> <!-- Activate dedicated EPS bearer context request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11000110"> <!-- Activate dedicated EPS bearer context accept -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11000111"> <!-- Activate dedicated EPS bearer context reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11001001"> <!-- Modify EPS bearer context request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11001010"> <!-- Modify EPS bearer context accept -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11001011"> <!-- Modify EPS bearer context reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11001101"> <!-- Deactivate EPS bearer context request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11001110"> <!-- Deactivate EPS bearer context accept -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010000"> <!-- PDN connectivity request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010001"> <!-- PDN connectivity reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010010"> <!-- PDN disconnect request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010011"> <!-- PDN disconnect reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010100"> <!-- Bearer resource allocation request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010101"> <!-- Bearer resource allocation reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010110"> <!-- Bearer resource modification request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11010111"> <!-- Bearer resource modification reject -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11011001"> <!-- ESM information request -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11011010"> <!-- ESM information response -->
+        <fragment href="#Empty"/>
       </case>
       <case value="0b11101000"> <!-- ESM status -->
+        <fragment href="#Empty"/>
       </case>
     </switch>
   </structure>
