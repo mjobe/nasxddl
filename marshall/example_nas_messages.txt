@@ -1,0 +1,62 @@
+
+=== Done (from Spirent) ===
+Attach Accept
+270000000001 074201DF062000F110010000215201C1090101010101010101010D0C7373656E6F617574683134360501C0A81401500BF600F11000010201000000
+
+Attach Complete
+270000000001 074300035200C2
+
+Attach Request
+07417108091010103254063605808000000000040201D011
+
+Authentication Request
+07520111111111111111111111111111111111101215141DC609010011101318C5041616
+
+Authentication Response
+075310111013121514171619181B1A1D1C1F1E
+
+Security Mode Command
+370000000000 075D0071028080
+
+=== Done (I created these for test) ===
+
+Attach Request (with all Optional parameters
+07417108091010103254063605808000000000040201D01119aabbcc500b01abcdef112233aabbccdd52aabbccddee5caa1f3104aabbccdd13aabbccddee97110300ff002003aabbcc400c7701aa8802aabb9903aabbcc
+
+Attach Reject
+0744017800035200C2
+
+Authentication Failure
+075c013004aabbccdd
+
+Authentication Reject
+0754
+
+CS Service Notification
+07646004aabbccdd61016202630411223344
+
+Detach Accept
+0746
+
+Detach Request
+0745990b09123456000101aabbccdd
+
+Downlink NAS Transport
+07620401020304
+
+
+=== To Do ===
+
+Security Mode Complete
+470000000000 075E
+
+075E2308FFFFFFFFFFFFFFFF
+075E2302FFFF
+
+
+=== Test Only ===
+
+=== Bugs/Improvements ===
+Edit/Paste shows no error message if it doesn't like the message pasted
+After loading the XDDL definition there is no indication of what XDDL is loaded
+
