@@ -38,12 +38,22 @@ CS Service Notification
 Detach Accept
 0746
 
-Detach Request
+Detach Request (setprop Direction = 1)
 0745990b09123456000101aabbccdd
+Detach Request (setprop Direction = 0)
+0745905301
 
 Downlink NAS Transport
 07620401020304
 
+EMM Information
+0761430899010203040506074508990807060504030246014701020304050608490103
+
+EMM Status
+0760ff
+
+Extended Service Request
+074c19021911B1
 
 === To Do ===
 

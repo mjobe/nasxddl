@@ -119,7 +119,7 @@
     </record>
   </fragment>
 
-  <fragment id="SpareHalfOctet">
+  <fragment id="SpareHalfOctet_V">
     <record name="Spare Half Octet">
       <field length="4" name="SpareHalfOctet"/>
     </record>
@@ -286,6 +286,11 @@
   </fragment>
   <fragment id="IMEISV_LV">
     <record name="IMEISV">
+      <fragment href="#MobileIdentity_LV"/>
+    </record>
+  </fragment>
+  <fragment id="M_TMSI_LV">
+    <record name="M-TMSI">
       <fragment href="#MobileIdentity_LV"/>
     </record>
   </fragment>
@@ -740,6 +745,66 @@
     </record>
   </fragment>
 
+  <!-- 9.9.3.24 (3-?) (TS 24.008 10.5.3.5a) -->
+  <fragment id="NetworkName_LV">
+    <record name="Network Name">
+      <field length="8" name="Length"/>
+      <record length="8 * Length" name="Contents">
+        <field length="1" name="Ext"/>
+        <field length="3" name="CodingScheme" type="#xxx"/>
+        <field length="1" name="AddCI" type="#xxx"/>
+        <field length="3" name="Number of Spare Bits in Last Octet"/>
+        <field length="8 * (Length - 1)" name="Text String"/>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.29 (2) (TS 24.008 10.5.3.8) -->
+  <fragment id="TimeZone_V">
+    <record name="Time Zone">
+      <field length="8" name="Time Zone" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.30 (8) (TS 24.008 10.5.3.9) -->
+  <fragment id="TimeZoneAndTime_V">
+    <record name="Time Zone And Time">
+      <field length="8" name="Year"/>
+      <field length="8" name="Month"/>
+      <field length="8" name="Day"/>
+      <field length="8" name="Hour"/>
+      <field length="8" name="Minute"/>
+      <field length="8" name="Second"/>
+      <field length="8" name="Time Zone" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.6 (3) (TS 24.008 10.5.3.12) -->
+  <fragment id="DaylightSavingTime_LV">
+    <record name="Daylight Saving Time">
+      <field length="8" name="Length"/>
+      <record length="8 * Length" name="Contents">
+        <field length="6" name="Spare"/>
+        <field length="2" name="Value"/>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.27 (1/2) -->
+  <fragment id="ServiceType_V">
+    <record name="Service Type">
+      <field length="4" name="ServiceType" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.5 (1) (TS 24.008 10.5.3.?) -->
+  <fragment id="CSFB_Response_V">
+    <record name="CSFB Response">
+      <field length="1" name="Spare"/>
+      <field length="3" name="Response" type="#xxx"/>
+    </record>
+  </fragment>
+
   <fragment id="OptionalElements">
     <repeat name="Optional Elements">
       <field length="1" name="ShortIEIBit"/>
@@ -749,6 +814,9 @@
           <switch expr="IEI">
             <case value="0b001"> <!-- 0x9 -->
               <fragment href="#TMSIStatus_V"/>
+            </case>
+            <case value="0b011"> <!-- 0xB -->
+              <fragment href="#CSFB_Response_V"/>
             </case>
             <case value="0b100"> <!-- 0xC -->
               <fragment href="#IMEISV_Request_V"/>
@@ -815,6 +883,31 @@
             </case>
             <case value="0x40">
               <fragment href="#SupportedCodecList_LV"/>
+            </case>
+            <case value="0x43">
+              <record name="Full Name For Network">
+                <fragment href="#NetworkName_LV"/>
+              </record>
+            </case>
+            <case value="0x45">
+              <record name="Short Name For Network">
+                <fragment href="#NetworkName_LV"/>
+              </record>
+            </case>
+            <case value="0x46">
+              <record name="Local Time Zone">
+                <fragment href="#TimeZone_V"/>
+              </record>
+            </case>
+            <case value="0x47">
+              <record name="Universal Time and Local Time Zone">
+                <fragment href="#TimeZoneAndTime_V"/>
+              </record>
+            </case>
+            <case value="0x49">
+              <record name="Network Daylight Saving Time">
+                <fragment href="#DaylightSavingTime_LV"/>
+              </record>
             </case>
             <case value="0x4A">
               <fragment href="#EquivalentPLMNs_LV"/>
@@ -884,6 +977,9 @@
   <structure>
     <oob>
       <prop name="Name" value="999" type="#MessageType"/>
+      <prop name="UEToNetwork" value="1"/>
+      <prop name="NetworkToUE" value="0"/>
+      <prop name="Direction" value="1"/>
     </oob>
     <fragment href="#ProtocolDiscriminator"/>
     <fragment href="#SecurityHeaderType"/>
@@ -899,7 +995,7 @@
       </case>
       <case value="0b01000010"> <!-- Attach accept 0x42 -->
         <fragment href="#EPSAttachResult_V"/>
-        <fragment href="#SpareHalfOctet"/>
+        <fragment href="#SpareHalfOctet_V"/>
         <fragment href="#T3412value_V"/>
         <fragment href="#TAIList_LV"/>
         <fragment href="#ESMMessageContainer_LVE"/>
@@ -914,8 +1010,16 @@
       </case>
       <case value="0b01000101"> <!-- Detach request -->
         <fragment href="#DetachType_V"/>
-        <fragment href="#NASKeySetIdentifier_V"/>
-        <fragment href="#EPSMobileIdentityGUTI_LV"/>
+        <switch expr="Direction">
+          <case value="0">
+            <fragment href="#SpareHalfOctet_V"/>
+            <fragment href="#OptionalElements"/>
+          </case>
+          <default> <!-- UEToNetwork -->
+            <fragment href="#NASKeySetIdentifier_V"/>
+            <fragment href="#EPSMobileIdentityGUTI_LV"/>
+          </default>
+        </switch>
       </case>
       <case value="0b01000110"> <!-- Detach accept -->
         <fragment href="#Empty"/>
@@ -933,7 +1037,10 @@
         <fragment href="#Empty"/>
       </case>
       <case value="0b01001100"> <!-- Extended service request -->
-        <fragment href="#Empty"/>
+        <fragment href="#ServiceType_V"/>
+        <fragment href="#NASKeySetIdentifier_V"/>
+        <fragment href="#M_TMSI_LV"/>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01001110"> <!-- Service reject -->
         <fragment href="#Empty"/>
@@ -946,7 +1053,7 @@
       </case>
       <case value="0b01010010"> <!-- Authentication request 8.2.7 -->
         <fragment href="#NASKeySetIdentifier_V"/>
-        <fragment href="#SpareHalfOctet"/>
+        <fragment href="#SpareHalfOctet_V"/>
         <record name="EPS Challenge">
           <fragment href="#AuthParamRAND_V"/>
           <fragment href="#AuthParamAUTN_LV"/>
@@ -971,7 +1078,7 @@
       <case value="0b01011101"> <!-- Security mode command 8.2.20 -->
         <fragment href="#NASSecurityAlgorithms_V"/>
         <fragment href="#NASKeySetIdentifier_V"/>
-        <fragment href="#SpareHalfOctet"/>
+        <fragment href="#SpareHalfOctet_V"/>
         <record name="Replayed UE Security Capabilities">
           <fragment href="#UESecurityCapability_LV"/>
         </record>
@@ -984,10 +1091,10 @@
         <fragment href="#Empty"/>
       </case>
       <case value="0b01100000"> <!-- EMM status -->
-        <fragment href="#Empty"/>
+        <fragment href="#EMMCause_V"/>
       </case>
       <case value="0b01100001"> <!-- EMM information -->
-        <fragment href="#Empty"/>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01100010"> <!-- Downlink NAS transport -->
         <fragment href="#NASMessageContainer_LV"/>
