@@ -91,19 +91,19 @@
   <fragment id="Empty">
     <field length="0" name="Spare"/>
   </fragment>
-  <fragment id="ProtocolDiscriminator">
+  <fragment id="ProtocolDiscriminator_V">
     <!-- 9.2 -->
     <record name="Protocol Discriminator">
       <field length="4" name="ProtocolDiscriminator" type="#ProtocolDiscriminator"/>
     </record>
   </fragment>
-  <fragment id="SecurityHeaderType">
+  <fragment id="SecurityHeaderType_V">
     <!-- 9.3.1 -->
     <record name="Security Header Type">
       <field length="4" name="SecurityHeaderType" type="#SecurityHeaderType"/>
     </record>
   </fragment>
-  <fragment id="MessageType">
+  <fragment id="MessageType_V">
     <!-- 9.8 -->
     <!-- <record name="Message Type" import="true"> -->
       <field length="8" name="MessageType" type="#MessageType"/>
@@ -125,14 +125,12 @@
     </record>
   </fragment>
 
-  <!-- 24.008 TS 10.5.7.3 -->
+  <!-- 9.9.3.16 (TS 24.008 10.5.7.3) -->
   <fragment id="GPRSTimer_V">
     <record name="GPRSTimer">
       <field length="8" name="GPRSTimer"/>
     </record>
   </fragment>
-
-  <!-- 9.9.3.16 -->
   <fragment id="T3412value_V">
     <record name="T3412value">
       <fragment href="#GPRSTimer_V"/>
@@ -145,6 +143,11 @@
   </fragment>
   <fragment id="T3423value_V">
     <record name="T3423value">
+      <fragment href="#GPRSTimer_V"/>
+    </record>
+  </fragment>
+  <fragment id="T3442value_V">
+    <record name="T3442value">
       <fragment href="#GPRSTimer_V"/>
     </record>
   </fragment>
@@ -242,7 +245,7 @@
     </record>
   </fragment>
 
-  <!-- TS 24.008 10.5.1.4 -->
+  <!-- 9.9.2.3 (TS 24.008 10.5.1.4) -->
   <fragment id="MobileIdentity_LV">
     <record name="MobileIdentity">
       <field length="8" name="Length"/>
@@ -276,9 +279,6 @@
       </record>
     </record>
   </fragment>
-
-
-  <!-- 9.9.2.3 -->
   <fragment id="MSIdentity_LV">
     <record name="MSIdentity">
       <fragment href="#MobileIdentity_LV"/>
@@ -797,13 +797,51 @@
     </record>
   </fragment>
 
-  <!-- 9.9.3.5 (1) (TS 24.008 10.5.3.?) -->
+  <!-- 9.9.3.5 (1) -->
   <fragment id="CSFB_Response_V">
     <record name="CSFB Response">
       <field length="1" name="Spare"/>
       <field length="3" name="Response" type="#xxx"/>
     </record>
   </fragment>
+
+  <!-- 9.9.3.17 (1/2) (TS 24.008 10.5.5.9) -->
+  <fragment id="IdentityType2_V">
+    <record name="Identity Type 2">
+      <field length="1" name="Spare"/>
+      <field length="3" name="Type" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.5 (4) -->
+  <fragment id="MessageAuthenticationCode_V">
+    <record name="Message Authentication Code">
+      <field length="8 * 4" name="TBD"/>
+    </record>
+  </fragment>
+
+  <!-- 9.6 (1) -->
+  <fragment id="SequenceNumber_V">
+    <record name="Sequence Number">
+      <field length="8" name="Spare"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.19 (1) -->
+  <fragment id="KSIandSequenceNumber_V">
+    <record name="Identity Type 2">
+      <field length="3" name="KSI_ASME" type="#xxx"/>
+      <field length="5" name="SequenceNumber"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.28 (2) -->
+  <fragment id="MACShort_V">
+    <record name="Message Authentication Code (Short)">
+      <field length="16" name="MAC"/>
+    </record>
+  </fragment>
+
 
   <fragment id="OptionalElements">
     <repeat name="Optional Elements">
@@ -939,6 +977,9 @@
             <case value="0x53">
               <fragment href="#EMMCause_V"/>
             </case>
+            <case value="0x54">
+              <fragment href="#TAIList_LV"/>
+            </case>
             <case value="0x55">
               <fragment href="#ReplayedNonce"/>
             </case>
@@ -947,6 +988,9 @@
             </case>
             <case value="0x59">
               <fragment href="#T3423value_V"/>
+            </case>
+            <case value="0x5B">
+              <fragment href="#T3442value_V"/>
             </case>
             <case value="0x5C">
               <fragment href="#DRXParameter_V"/>
@@ -973,17 +1017,11 @@
     </repeat>
   </fragment>
 
-  <!-- STRUCTURE -->
-  <structure>
-    <oob>
-      <prop name="Name" value="999" type="#MessageType"/>
-      <prop name="UEToNetwork" value="1"/>
-      <prop name="NetworkToUE" value="0"/>
-      <prop name="Direction" value="1"/>
-    </oob>
-    <fragment href="#ProtocolDiscriminator"/>
-    <fragment href="#SecurityHeaderType"/>
-    <fragment href="#MessageType"/>
+  <!-- ?.?.? -->
+  <fragment id="NASMessage_V">
+    <fragment href="#ProtocolDiscriminator_V"/>
+    <fragment href="#SecurityHeaderType_V"/>
+    <fragment href="#MessageType_V"/>
     <switch expr="MessageType">
       <case value="0b01000001"> <!-- Attach request 0x41 -->
         <fragment href="#EPSAttachType_V"/>
@@ -1011,9 +1049,13 @@
       <case value="0b01000101"> <!-- Detach request -->
         <fragment href="#DetachType_V"/>
         <switch expr="Direction">
-          <case value="0">
+          <case value="0"> <!-- NetworkToUE -->
             <fragment href="#SpareHalfOctet_V"/>
             <fragment href="#OptionalElements"/>
+          </case>
+          <case value="1"> <!-- UEToNetwork -->
+            <fragment href="#NASKeySetIdentifier_V"/>
+            <fragment href="#EPSMobileIdentityGUTI_LV"/>
           </case>
           <default> <!-- UEToNetwork -->
             <fragment href="#NASKeySetIdentifier_V"/>
@@ -1043,10 +1085,12 @@
         <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01001110"> <!-- Service reject -->
-        <fragment href="#Empty"/>
+        <fragment href="#EMMCause_V"/>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01010000"> <!-- GUTI reallocation command -->
-        <fragment href="#Empty"/>
+        <fragment href="#EPSMobileIdentityGUTI_LV"/>
+        <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01010001"> <!-- GUTI reallocation complete -->
         <fragment href="#Empty"/>
@@ -1070,10 +1114,11 @@
         <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01010101"> <!-- Identity request -->
-        <fragment href="#Empty"/>
+        <fragment href="#IdentityType2_V"/>
+        <fragment href="#SpareHalfOctet_V"/>
       </case>
       <case value="0b01010110"> <!-- Identity response -->
-        <fragment href="#Empty"/>
+        <fragment href="#MobileIdentity_LV"/>
       </case>
       <case value="0b01011101"> <!-- Security mode command 8.2.20 -->
         <fragment href="#NASSecurityAlgorithms_V"/>
@@ -1088,7 +1133,7 @@
         <fragment href="#OptionalElements"/>
       </case>
       <case value="0b01011111"> <!-- Security mode reject -->
-        <fragment href="#Empty"/>
+        <fragment href="#EMMCause_V"/>
       </case>
       <case value="0b01100000"> <!-- EMM status -->
         <fragment href="#EMMCause_V"/>
@@ -1172,5 +1217,29 @@
         <fragment href="#Empty"/>
       </case>
     </switch>
+  </fragment>
+
+  <!-- 8.2.23 -->
+  <fragment id="SecurityProtectedNASMessage">
+    <record name="Security Protected NAS Message">
+      <fragment href="#ProtocolDiscriminator_V"/>
+      <fragment href="#SecurityHeaderType_V"/>
+      <fragment href="#MessageAuthenticationCode_V"/>
+      <fragment href="#SequenceNumber_V"/>
+      <record name="NAS Message">
+        <fragment href="#NASMessage_V"/>
+      </record>
+    </record>
+  </fragment>
+
+  <!-- STRUCTURE -->
+  <structure>
+    <oob>
+      <prop name="Name" value="999" type="#MessageType"/>
+      <prop name="UEToNetwork" value="1"/>
+      <prop name="NetworkToUE" value="0"/>
+      <prop name="Direction" value="1"/>
+    </oob>
+    <fragment href="#NASMessage_V"/>
   </structure>
 </xddl>

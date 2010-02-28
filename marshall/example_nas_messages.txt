@@ -55,7 +55,26 @@ EMM Status
 Extended Service Request
 074c19021911B1
 
+GUTI Reallocation Command
+47500b09123456000101aabbccdd54062000F1100100 
+
+GUTI Reallocation Complete
+4751
+
+Identity Request
+475590
+
+Identity Response
+075608FFFFFFFFFFFFFFFF
+
+Security Mode Reject
+075f01
+
+Service Reject 
+074e015B01
+
 === To Do ===
+
 
 Security Mode Complete
 470000000000 075E
@@ -64,7 +83,16 @@ Security Mode Complete
 075E2302FFFF
 
 
-=== Test Only ===
+=== IEIs ===
+EPSMobileIdentityGUTI_LV
+0b09123456000101aabbccdd
+
+TAIList_LV
+062000F1100100 
+
+MobileIdentity_LV
+08FFFFFFFFFFFFFFFF
+
 
 === Bugs/Improvements ===
 Edit/Paste shows no error message if it doesn't like the message pasted
