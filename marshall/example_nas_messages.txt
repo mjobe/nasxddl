@@ -73,8 +73,25 @@ Security Mode Reject
 Service Reject 
 074e015B01
 
-=== To Do ===
+Service Request (ToDo)
+Don't know how to parse this. I doesn't have a message type.
 
+Security Mode Command
+075D0071028080C755aabbccdd56aabbccdd
+
+Tracking Area Update Accept
+0749105A02500b09123456000101aabbccdd540620123456abcd5702ffff13abcdef1234230832123456abcdefff5301170259034a06123456abcdef8a340a05221234567803221234
+
+Tracking Area Update Complete
+074A
+
+Tracking Area Update Reject
+074B01
+
+Tracking Area Update Request
+Todo need example
+
+=== To Do ===
 
 Security Mode Complete
 470000000000 075E
@@ -88,11 +105,22 @@ EPSMobileIdentityGUTI_LV
 0b09123456000101aabbccdd
 
 TAIList_LV
-062000F1100100 
+0620123456abcd 
 
 MobileIdentity_LV
-08FFFFFFFFFFFFFFFF
+0832123456abcdefff
 
+EmergencyNumberList_LV
+0a05221234567803221234
+
+EPSBearerContextStatus_LV
+02ffff
+
+LocationAreaIdentification_V
+abcdef1234
+
+PLMNList_LV
+06123456abcdef
 
 === Bugs/Improvements ===
 Edit/Paste shows no error message if it doesn't like the message pasted

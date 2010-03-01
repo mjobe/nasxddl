@@ -302,10 +302,10 @@
     </record>
   </fragment>
 
-  <!-- TS 24.008 10.5.1.13 -->
+  <!-- 9.9.2.8 (TS 24.008 10.5.1.13) -->
   <fragment id="PLMNList_LV">
     <record name="PLMNList">
-      <field length="8" name="Length" type="#xxx"/>
+      <field length="8" name="Length"/>
       <record name="Contents" length="8 * Length">
         <repeat>
           <field length="4" name="MCCDigit2"/>
@@ -318,10 +318,51 @@
       </record>
     </record>
   </fragment>
-  <!-- 9.9.2.8 -->
   <fragment id="EquivalentPLMNs_LV">
     <record name="EquivalentPLMNs">
       <fragment href="#PLMNList_LV"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.13 -->
+  <fragment id="EPSUpdateResult_V">
+    <record name="EPS Update Result">
+      <field length="1" name="Spare"/>
+      <field length="3" name="Update Result" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.14 -->
+  <fragment id="EPSUpdateType_V">
+    <record name="EPS Update Result">
+      <field length="1" name="Active Flag"/>
+      <field length="3" name="Update Type" type="#xxx"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.2.1 (4) -->
+  <fragment id="EPSBearerContextStatus_LV">
+    <record name="EPS Bearer Context Status">
+      <field length="8" name="Length"/>
+      <record name="Contents" length="8 * Length">
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+        <field length="1" name="EBI" type="#xxx"/>
+      </record>
     </record>
   </fragment>
 
@@ -330,18 +371,17 @@
     <record name="EmergencyNumberList">
       <field length="8" name="Length"/>
       <record name="Contents" length="8 * Length">
-        <repeat>
+        <repeat name="Emergency Numbers">
           <field length="8" name="Length"/>
-          <field length="3" name="Spare"/>
-          <field length="5" name="Emergency Service Catagory" type="#xxx"/>
-          <record name="NumberList" length="8 * Length">
-            <repeat>
-              <field length="4" name="Digit"/>
-            </repeat>
+          <record name="Contents" length="8 * Length">
+            <field length="3" name="Spare"/>
+            <field length="5" name="Emergency Service Catagory" type="#xxx"/>
+            <record name="Emergency Number" length="8 * (Length-1)">
+              <repeat>
+                <field length="4" name="Digit"/>
+              </repeat>
+            </record>
           </record>
-          <if expr="Length &amp; 0x1">
-              <field length="4" name="End Mark"/>
-          </if>
         </repeat>
       </record>
     </record>
@@ -372,7 +412,7 @@
   </fragment>
 
   <!-- 9.9.3.34 (3-14) -->
-  <fragment id="UENetworkCompatability_LV">
+  <fragment id="UENetworkCapability_LV">
     <record name="UE Network Compatability">
       <field length="8" name="Length"/>
       <record name="Contents" length="8 * Length">
@@ -688,14 +728,14 @@
   </fragment>
 
   <!-- 9.9.3.25 (5) -->
-  <fragment id="Nonce">
-    <record name="Nonce">
-      <field length="8 * 4" name="Value"/>
+  <fragment id="Nonce_MME_V">
+    <record name="Nonce MME">
+      <field length="32" name="Value"/>
     </record>
   </fragment>
-  <fragment id="ReplayedNonce">
-    <record name="Nonce">
-      <field length="8 * 4" name="Value"/>
+  <fragment id="Nonce_UE_V">
+    <record name="Nonce UE">
+      <field length="32" name="Value"/>
     </record>
   </fragment>
 
@@ -841,7 +881,24 @@
       <field length="16" name="MAC"/>
     </record>
   </fragment>
+  <fragment id="ShortMAC_V">
+    <fragment href="#MACShort_V"/>
+  </fragment>
 
+  <!-- 9.9.4.13 todo -->
+  <fragment id="RadioPriority_V">
+    <record name="Radio Priority">
+      <fragment href="#Empty"/>
+    </record>
+  </fragment>
+
+  <!-- 9.9.3.25 -->
+  <fragment id="UERadioCapabilityInfoUpdateNeeded_V">
+    <record name="UE Radio Capability Info Update Needed">
+      <field length="3" name="Spare"/>
+      <field length="1" name="Update Needed Flag" type="#xxx"/>
+    </record>
+  </fragment>
 
   <fragment id="OptionalElements">
     <repeat name="Optional Elements">
@@ -850,13 +907,33 @@
         <case value="1">
           <field length="3" name="IEI"/>
           <switch expr="IEI">
-            <case value="0b001"> <!-- 0x9 -->
+            <case value="0b000"> <!-- IEI 0x8 -->
+              <switch expr="MessageType">
+                <case value="0b01001001"> <!-- Tracking area update accept -->
+                  <fragment href="#NASKeySetIdentifier_V"/>
+                </case>
+                <default>
+                  <fragment href="#RadioPriority_V"/>
+                </default>
+              </switch>
+            </case>
+            <case value="0b001"> <!-- IEI 0x9 -->
               <fragment href="#TMSIStatus_V"/>
             </case>
-            <case value="0b011"> <!-- 0xB -->
-              <fragment href="#CSFB_Response_V"/>
+            <case value="0b001"> <!-- IEI 0xA -->
+              <fragment href="#UERadioCapabilityInfoUpdateNeeded_V"/>
             </case>
-            <case value="0b100"> <!-- 0xC -->
+            <case value="0b011"> <!-- IEI 0xB -->
+              <switch expr="MessageType">
+                <case value="0b01001100"> <!-- Extended service request -->
+                  <fragment href="#CSFB_Response_V"/>
+                </case>
+                <default>
+                  <fragment href="#NASKeySetIdentifier_V"/>
+                </default>
+              </switch>
+            </case>
+            <case value="0b100"> <!-- IEI 0xC -->
               <fragment href="#IMEISV_Request_V"/>
             </case>
           </switch>
@@ -869,6 +946,7 @@
             </case>
             <case value="0x13">
                 <switch expr="MessageType">
+                  <case value="0b01001000"/> <!-- Tracking area update request -->
                   <case value="0b01000001"> <!-- Attach Request -->
                     <record name="OldLocationAreaIdentification">
                       <fragment href="#LocationAreaIdentification_V"/>
@@ -884,6 +962,7 @@
             </case>
             <case value="0x19">
                 <switch expr="MessageType">
+                  <case value="0b01001000"/> <!-- Tracking area update request -->
                   <case value="0b01000001"> <!-- Attach Request -->
                     <record name="Old TMSI Signature">
                       <fragment href="#P_TMSI_Signature_V"/>
@@ -899,6 +978,7 @@
             </case>
             <case value="0x23">
                 <switch expr="MessageType">
+                  <case value="0b01001001"/> <!-- Tracking area update accept -->
                   <case value="0b01000010"> <!-- Attach Accept -->
                     <fragment href="#MSIdentity_LV"/>
                   </case>
@@ -952,6 +1032,7 @@
             </case>
             <case value="0x50">
                 <switch expr="MessageType">
+                  <case value="0b01001000"/> <!-- Tracking area update request -->
                   <case value="0b01000001"> <!-- Attach Request -->
                     <record name="Additional GUTI">
                       <fragment href="#EPSMobileIdentityGUTI_LV"/>
@@ -964,6 +1045,7 @@
             </case>
             <case value="0x52">
                 <switch expr="MessageType">
+                  <case value="0b01001000"/> <!-- Tracking area update request -->
                   <case value="0b01000001"> <!-- Attach Request -->
                     <record name="Last Visited Registered TAI">
                       <fragment href="#TrackingAreaIdentity_V"/>
@@ -981,13 +1063,31 @@
               <fragment href="#TAIList_LV"/>
             </case>
             <case value="0x55">
-              <fragment href="#ReplayedNonce"/>
+                <switch expr="MessageType">
+                  <case value="0b01011101"> <!-- Security mode command -->
+                    <record name="Replayed Nonce">
+                      <fragment href="#Nonce_UE_V"/>
+                    </record>
+                  </case>
+                  <default>
+                    <fragment href="#Nonce_UE_V"/>
+                  </default>
+                </switch>
             </case>
             <case value="0x56">
-              <fragment href="#Nonce"/>
+              <fragment href="#Nonce_MME_V"/>
+            </case>
+            <case value="0x57">
+              <fragment href="#EPSBearerContextStatus_LV"/>
+            </case>
+            <case value="0x58">
+              <fragment href="#UENetworkCapability_LV"/>
             </case>
             <case value="0x59">
               <fragment href="#T3423value_V"/>
+            </case>
+            <case value="0x5A">
+              <fragment href="#T3412value_V"/>
             </case>
             <case value="0x5B">
               <fragment href="#T3442value_V"/>
@@ -1015,7 +1115,7 @@
       </switch>
 
     </repeat>
-  </fragment>
+  </fragment> <!-- fragment optional end -->
 
   <!-- ?.?.? -->
   <fragment id="NASMessage_V">
@@ -1023,15 +1123,15 @@
     <fragment href="#SecurityHeaderType_V"/>
     <fragment href="#MessageType_V"/>
     <switch expr="MessageType">
-      <case value="0b01000001"> <!-- Attach request 0x41 -->
+      <case value="0b01000001"> <!-- Attach request 0x41 8.2.todo -->
         <fragment href="#EPSAttachType_V"/>
         <fragment href="#NASKeySetIdentifier_V"/>
         <fragment href="#EPSMobileIdentityGUTI_LV"/>
-        <fragment href="#UENetworkCompatability_LV"/>
+        <fragment href="#UENetworkCapability_LV"/>
         <fragment href="#ESMMessageContainer_LVE"/>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01000010"> <!-- Attach accept 0x42 -->
+      <case value="0b01000010"> <!-- Attach accept 0x42 8.2.todo -->
         <fragment href="#EPSAttachResult_V"/>
         <fragment href="#SpareHalfOctet_V"/>
         <fragment href="#T3412value_V"/>
@@ -1039,14 +1139,14 @@
         <fragment href="#ESMMessageContainer_LVE"/>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01000011"> <!-- Attach complete 0x43 -->
+      <case value="0b01000011"> <!-- Attach complete 0x43 8.2.todo -->
         <fragment href="#ESMMessageContainer_LVE"/>
       </case>
-      <case value="0b01000100"> <!-- Attach reject 0x44 -->
+      <case value="0b01000100"> <!-- Attach reject 0x44 8.2.todo -->
         <fragment href="#EMMCause_V"/>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01000101"> <!-- Detach request -->
+      <case value="0b01000101"> <!-- Detach request 0xtodo 8.2.todo -->
         <fragment href="#DetachType_V"/>
         <switch expr="Direction">
           <case value="0"> <!-- NetworkToUE -->
@@ -1063,39 +1163,50 @@
           </default>
         </switch>
       </case>
-      <case value="0b01000110"> <!-- Detach accept -->
+      <case value="0b01000110"> <!-- Detach accept 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b01001000"> <!-- Tracking area update request -->
+      <case value="0b01001000"> <!-- Tracking area update request 0x48 8.2.29 -->
+        <fragment href="#EPSUpdateType_V"/>
+        <fragment href="#NASKeySetIdentifier_V"/>
+        <record name="Old GUTI">
+          <fragment href="#EPSMobileIdentityGUTI_LV"/>
+        </record>
+        <fragment href="#OptionalElements"/>
+      </case>
+      <case value="0b01001001"> <!-- Tracking area update accept 0x49 8.2.26 -->
+        <fragment href="#EPSUpdateResult_V"/>
+        <fragment href="#SpareHalfOctet_V"/>
+        <fragment href="#OptionalElements"/>
+      </case>
+      <case value="0b01001010"> <!-- Tracking area update complete 0x4A 8.2.27 -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b01001001"> <!-- Tracking area update accept -->
-        <fragment href="#Empty"/>
+      <case value="0b01001011"> <!-- Tracking area update reject 0x4B 8.2.28 -->
+        <fragment href="#EMMCause_V"/>
       </case>
-      <case value="0b01001010"> <!-- Tracking area update complete -->
-        <fragment href="#Empty"/>
-      </case>
-      <case value="0b01001011"> <!-- Tracking area update reject -->
-        <fragment href="#Empty"/>
-      </case>
-      <case value="0b01001100"> <!-- Extended service request -->
+      <case value="0b01001100"> <!-- Extended service request 0x4C 8.2.15 -->
         <fragment href="#ServiceType_V"/>
         <fragment href="#NASKeySetIdentifier_V"/>
         <fragment href="#M_TMSI_LV"/>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01001110"> <!-- Service reject -->
+      <case value="0b01001110"> <!-- Service reject 0xtodo 8.2.todo -->
         <fragment href="#EMMCause_V"/>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01010000"> <!-- GUTI reallocation command -->
+      <!-- Service Request (TODO: 8.2.25: no message type)
+          <fragment href="#KSIandSequenceNumber_V"/>
+          <fragment href="#ShortMAC_V"/>
+      -->
+      <case value="0b01010000"> <!-- GUTI reallocation command 0xtodo 8.2.todo -->
         <fragment href="#EPSMobileIdentityGUTI_LV"/>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01010001"> <!-- GUTI reallocation complete -->
+      <case value="0b01010001"> <!-- GUTI reallocation complete 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b01010010"> <!-- Authentication request 8.2.7 -->
+      <case value="0b01010010"> <!-- Authentication request 8.2.7 0xtodo 8.2.todo -->
         <fragment href="#NASKeySetIdentifier_V"/>
         <fragment href="#SpareHalfOctet_V"/>
         <record name="EPS Challenge">
@@ -1103,24 +1214,24 @@
           <fragment href="#AuthParamAUTN_LV"/>
         </record>
       </case>
-      <case value="0b01010011"> <!-- Authentication response 8.2.8 -->
+      <case value="0b01010011"> <!-- Authentication response 8.2.8 0xtodo 8.2.todo -->
         <fragment href="#AuthResponseParam_LV"/>
       </case>
-      <case value="0b01010100"> <!-- Authentication reject -->
+      <case value="0b01010100"> <!-- Authentication reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b01011100"> <!-- Authentication failure -->
+      <case value="0b01011100"> <!-- Authentication failure 0xtodo 8.2.todo -->
         <fragment href="#EMMCause_V"/>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01010101"> <!-- Identity request -->
+      <case value="0b01010101"> <!-- Identity request 0xtodo 8.2.todo -->
         <fragment href="#IdentityType2_V"/>
         <fragment href="#SpareHalfOctet_V"/>
       </case>
-      <case value="0b01010110"> <!-- Identity response -->
+      <case value="0b01010110"> <!-- Identity response 0xtodo 8.2.todo -->
         <fragment href="#MobileIdentity_LV"/>
       </case>
-      <case value="0b01011101"> <!-- Security mode command 8.2.20 -->
+      <case value="0b01011101"> <!-- Security mode command 8.2.20 0xtodo 8.2.todo -->
         <fragment href="#NASSecurityAlgorithms_V"/>
         <fragment href="#NASKeySetIdentifier_V"/>
         <fragment href="#SpareHalfOctet_V"/>
@@ -1129,91 +1240,91 @@
         </record>
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01011110"> <!-- Security mode complete -->
+      <case value="0b01011110"> <!-- Security mode complete 0xtodo 8.2.todo -->
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01011111"> <!-- Security mode reject -->
+      <case value="0b01011111"> <!-- Security mode reject 0xtodo 8.2.todo -->
         <fragment href="#EMMCause_V"/>
       </case>
-      <case value="0b01100000"> <!-- EMM status -->
+      <case value="0b01100000"> <!-- EMM status 0xtodo 8.2.todo -->
         <fragment href="#EMMCause_V"/>
       </case>
-      <case value="0b01100001"> <!-- EMM information -->
+      <case value="0b01100001"> <!-- EMM information 0xtodo 8.2.todo -->
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b01100010"> <!-- Downlink NAS transport -->
+      <case value="0b01100010"> <!-- Downlink NAS transport 0xtodo 8.2.todo -->
         <fragment href="#NASMessageContainer_LV"/>
       </case>
-      <case value="0b01100011"> <!-- Uplink NAS transport -->
+      <case value="0b01100011"> <!-- Uplink NAS transport 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b01100100"> <!-- CS Service notification -->
+      <case value="0b01100100"> <!-- CS Service notification 0xtodo 8.2.todo -->
         <fragment href="#OptionalElements"/>
       </case>
-      <case value="0b11000001"> <!-- Activate default EPS bearer context request -->
+      <case value="0b11000001"> <!-- Activate default EPS bearer context request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11000010"> <!-- Activate default EPS bearer context accept -->
+      <case value="0b11000010"> <!-- Activate default EPS bearer context accept 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11000011"> <!-- Activate default EPS bearer context reject -->
+      <case value="0b11000011"> <!-- Activate default EPS bearer context reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11000101"> <!-- Activate dedicated EPS bearer context request -->
+      <case value="0b11000101"> <!-- Activate dedicated EPS bearer context request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11000110"> <!-- Activate dedicated EPS bearer context accept -->
+      <case value="0b11000110"> <!-- Activate dedicated EPS bearer context accept 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11000111"> <!-- Activate dedicated EPS bearer context reject -->
+      <case value="0b11000111"> <!-- Activate dedicated EPS bearer context reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11001001"> <!-- Modify EPS bearer context request -->
+      <case value="0b11001001"> <!-- Modify EPS bearer context request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11001010"> <!-- Modify EPS bearer context accept -->
+      <case value="0b11001010"> <!-- Modify EPS bearer context accept 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11001011"> <!-- Modify EPS bearer context reject -->
+      <case value="0b11001011"> <!-- Modify EPS bearer context reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11001101"> <!-- Deactivate EPS bearer context request -->
+      <case value="0b11001101"> <!-- Deactivate EPS bearer context request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11001110"> <!-- Deactivate EPS bearer context accept -->
+      <case value="0b11001110"> <!-- Deactivate EPS bearer context accept 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010000"> <!-- PDN connectivity request -->
+      <case value="0b11010000"> <!-- PDN connectivity request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010001"> <!-- PDN connectivity reject -->
+      <case value="0b11010001"> <!-- PDN connectivity reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010010"> <!-- PDN disconnect request -->
+      <case value="0b11010010"> <!-- PDN disconnect request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010011"> <!-- PDN disconnect reject -->
+      <case value="0b11010011"> <!-- PDN disconnect reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010100"> <!-- Bearer resource allocation request -->
+      <case value="0b11010100"> <!-- Bearer resource allocation request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010101"> <!-- Bearer resource allocation reject -->
+      <case value="0b11010101"> <!-- Bearer resource allocation reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010110"> <!-- Bearer resource modification request -->
+      <case value="0b11010110"> <!-- Bearer resource modification request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11010111"> <!-- Bearer resource modification reject -->
+      <case value="0b11010111"> <!-- Bearer resource modification reject 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11011001"> <!-- ESM information request -->
+      <case value="0b11011001"> <!-- ESM information request 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11011010"> <!-- ESM information response -->
+      <case value="0b11011010"> <!-- ESM information response 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
-      <case value="0b11101000"> <!-- ESM status -->
+      <case value="0b11101000"> <!-- ESM status 0xtodo 8.2.todo -->
         <fragment href="#Empty"/>
       </case>
     </switch>
