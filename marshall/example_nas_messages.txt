@@ -89,7 +89,11 @@ Tracking Area Update Reject
 074B01
 
 Tracking Area Update Request
-Todo need example
+0748AB0b09123456000101aabbccddBA19112233500b09123456000101aabbccdd5511223344580580800000005211223311225c012bA15702ffff3102112213abcdef123491110339dfff20021122401001061122112211220206334433443344
+
+Uplink NAS Transport
+07630411223344
+
 
 === To Do ===
 
@@ -121,6 +125,18 @@ abcdef1234
 
 PLMNList_LV
 06123456abcdef
+
+UENetworkCapability_LV
+058080000000
+
+TrackingAreaIdentity_V
+1122331122
+
+MobileStationClassmark2_LV
+0339dfff
+
+SupportedCodecList_LV
+1001061122112211220206334433443344 
 
 === Bugs/Improvements ===
 Edit/Paste shows no error message if it doesn't like the message pasted
