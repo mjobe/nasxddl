@@ -1036,7 +1036,7 @@
   </fragment>
 
   <!-- 9.9.4.7 (TS 24.008 10.5.6.9) -->
-  <fragment id="LLCServiceAccessPointIdentifier._V">
+  <fragment id="LLCServiceAccessPointIdentifier_V">
     <record name="LLC Service Access Point Identifier">
       <field length="4" name="Spare"/>
       <field length="4" name="Value"/>
@@ -1156,43 +1156,53 @@
     </record>
   </fragment>
 
+  <fragment id="TrafficFlowTemplateBody">
+    <field length="8" name="Length"/>
+    <record name="Contents" length="8 * Length">
+      <field length="3" name="TFTOperationCode"/>
+      <field length="1" name="E_Bit"/>
+      <field length="4" name="NumberOfPacketFilters"/>
+      <record name="Packet Filter List">
+        <switch expr="TFTOperationCode">
+          <case value="0b101"> <!-- Delete Packet Filters from Existing TFT -->
+            <repeat num="NumberOfPacketFilters" name="Packet Filter List">
+              <field length="8" name="Packet Filter ID" type="#xxx"/>
+            </repeat>
+          </case>
+          <case value="0b001"/> <!-- Create New TFT -->
+          <case value="0b011"/> <!-- Add Packet Filters to Existing TFT -->
+          <case value="0b100">  <!-- Replace Packet Filters in Existing TFT -->
+            <repeat num="NumberOfPacketFilters" name="Packet Filter List">
+              <field length="8" name="Packet Filter ID" type="#xxx"/>
+              <field length="8" name="Packet Filter Evaluation Precedence"/>
+              <field length="8" name="Length"/>
+              <field length="8 * Length" name="Packet Filter Contents"/>
+            </repeat>
+          </case>
+        </switch>
+      </record>
+      <if expr="E_Bit">
+        <record name="Parameters List">
+          <repeat name="Packet Filter List">
+            <field length="8" name="Parameter Identifier"/>
+            <field length="8" name="Length"/>
+            <field length="8 * Length" name="Parameter Contents"/>
+          </repeat>
+        </record>
+      </if>
+    </record>
+  </fragment>
+  <!-- 9.9.4.15 (TS 24.008 10.5.6.12) -->
+  <fragment id="TrafficFlowAggregateDescription_LV">
+    <record name="Traffic Flow Aggregate Description">
+      <fragment href="#TrafficFlowTemplateBody"/>
+    </record>
+  </fragment>
+
   <!-- 9.9.4.16 (TS 24.008 10.5.6.12) -->
   <fragment id="TrafficFlowTemplate_LV">
     <record name="Traffic Flow Template">
-      <field length="8" name="Length"/>
-      <record name="Contents" length="8 * Length">
-        <field length="3" name="TFTOperationCode"/>
-        <field length="1" name="E_Bit"/>
-        <field length="4" name="NumberOfPacketFilters"/>
-        <record name="Packet Filter List">
-          <switch expr="TFTOperationCode">
-            <case value="0b101"> <!-- Delete Packet Filters from Existing TFT -->
-              <repeat num="NumberOfPacketFilters" name="Packet Filter List">
-                <field length="8" name="Packet Filter ID" type="#xxx"/>
-              </repeat>
-            </case>
-            <case value="0b001"/> <!-- Create New TFT -->
-            <case value="0b011"/> <!-- Add Packet Filters to Existing TFT -->
-            <case value="0b100">  <!-- Replace Packet Filters in Existing TFT -->
-              <repeat num="NumberOfPacketFilters" name="Packet Filter List">
-                <field length="8" name="Packet Filter ID" type="#xxx"/>
-                <field length="8" name="Packet Filter Evaluation Precedence"/>
-                <field length="8" name="Length"/>
-                <field length="8 * Length" name="Packet Filter Contents"/>
-              </repeat>
-            </case>
-          </switch>
-        </record>
-        <if expr="E_Bit">
-          <record name="Parameters List">
-            <repeat name="Packet Filter List">
-              <field length="8" name="Parameter Identifier"/>
-              <field length="8" name="Length"/>
-              <field length="8 * Length" name="Parameter Contents"/>
-            </repeat>
-          </record>
-        </if>
-      </record>
+      <fragment href="#TrafficFlowTemplateBody"/>
     </record>
   </fragment>
 
@@ -1253,6 +1263,9 @@
             <case value="0b100"> <!-- IEI 0xC -->
               <fragment href="#IMEISV_Request_V"/>
             </case>
+            <case value="0b101"> <!-- IEI 0xD -->
+              <fragment href="#ESMInformationTransferFlag_V"/>
+            </case>
           </switch>
         </case>
         <default>
@@ -1307,14 +1320,53 @@
                   </default>
                 </switch>
             </case>
+            <case value="0x28">
+              <fragment href="#AccessPointName_LV"/>
+            </case>
+            <case value="0x27">
+              <fragment href="#ProtocolConfigurationOptions_LV"/>
+            </case>
             <case value="0x30">
-              <fragment href="#AuthenticationFailureParam_LV"/>
+              <switch expr="ProtocolDiscriminator">
+                <case value="0b0111"> <!-- EPS mobility management messages -->
+                  <fragment href="#AuthenticationFailureParam_LV"/>
+                </case>
+                <case value="0b0010"> <!-- EPS session management messages -->
+                  <switch expr="MessageType">
+                    <case value="0b11001001"> <!-- Modify EPS bearer context request -->
+                      <record name="New QoS">
+                        <fragment href="#QualityOfService_LV"/>
+                      </record>
+                    </case>
+                    <default>
+                      <record name="Negotiated Quality of Service">
+                        <fragment href="#QualityOfService_LV"/>
+                      </record>
+                    </default>
+                  </switch>
+                </case>
+              </switch>
             </case>
             <case value="0x31">
               <fragment href="#MSNetworkCapability_LV"/>
             </case>
+            <case value="0x32">
+              <record name="Negotiated LLC SAPI">
+                <fragment href="#LLCServiceAccessPointIdentifier_V"/>
+              </record>
+            </case>
             <case value="0x34">
-              <fragment href="#EmergencyNumberList_LV"/>
+              <switch expr="ProtocolDiscriminator">
+                <case value="0b0111"> <!-- EPS mobility management messages -->
+                  <fragment href="#EmergencyNumberList_LV"/>
+                </case>
+                <case value="0b0010"> <!-- EPS session management messages -->
+                  <fragment href="#PacketFlowIdentifier_LV"/>
+                </case>
+              </switch>
+            </case>
+            <case value="0x36">
+              <fragment href="#TrafficFlowTemplate_LV"/>
             </case>
             <case value="0x40">
               <fragment href="#SupportedCodecList_LV"/>
@@ -1398,7 +1450,14 @@
               <fragment href="#EPSBearerContextStatus_LV"/>
             </case>
             <case value="0x58">
-              <fragment href="#UENetworkCapability_LV"/>
+              <switch expr="ProtocolDiscriminator">
+                <case value="0b0111"> <!-- EPS mobility management messages -->
+                  <fragment href="#UENetworkCapability_LV"/>
+                </case>
+                <case value="0b0010"> <!-- EPS session management messages -->
+                  <fragment href="#ESMCause_V"/>
+                </case>
+              </switch>
             </case>
             <case value="0x59">
               <fragment href="#T3423value_V"/>
@@ -1407,10 +1466,34 @@
               <fragment href="#T3412value_V"/>
             </case>
             <case value="0x5B">
-              <fragment href="#T3442value_V"/>
+              <switch expr="ProtocolDiscriminator">
+                <case value="0b0111"> <!-- EPS mobility management messages -->
+                  <fragment href="#T3442value_V"/>
+                </case>
+                <case value="0b0010"> <!-- EPS session management messages -->
+                  <switch expr="MessageType">
+                    <case value="0b11001001"> <!-- Modify EPS bearer context request -->
+                      <record name="New EPS QoS">
+                        <fragment href="#EPSQualityOfService_LV"/>
+                      </record>
+                    </case>
+                    <default>
+                      <record name="Required Traffic Flow QoS">
+                        <fragment href="#EPSQualityOfService_LV"/>
+                      </record>
+                    </default>
+                  </switch>
+                </case>
+              </switch>
             </case>
             <case value="0x5C">
               <fragment href="#DRXParameter_V"/>
+            </case>
+            <case value="0x5D">
+              <fragment href="#TransactionIdentifier_LV"/>
+            </case>
+            <case value="0x5E">
+              <fragment href="#APNAggregateMaxBitRate_LV"/>
             </case>
             <case value="0x60">
               <fragment href="#CLI_LV"/>
@@ -1587,70 +1670,100 @@
       <fragment href="#MessageType_V"/>
       <switch expr="MessageType">
         <case value="0b11000001"> <!-- Activate default EPS bearer context request 0xtodo 8.2.todo -->
+          <fragment href="#EPSQualityOfService_LV"/>
+          <fragment href="#AccessPointName_LV"/>
+          <fragment href="#PDNAddress_LV"/>
           <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11000010"> <!-- Activate default EPS bearer context accept 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11000011"> <!-- Activate default EPS bearer context reject 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11000101"> <!-- Activate dedicated EPS bearer context request 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#LinkedEPSBearerIdentity_V"/>
+          <fragment href="#SpareHalfOctet_V"/>
+          <fragment href="#EPSQualityOfService_LV"/>
+          <fragment href="#TrafficFlowTemplate_LV"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11000110"> <!-- Activate dedicated EPS bearer context accept 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11000111"> <!-- Activate dedicated EPS bearer context reject 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11001001"> <!-- Modify EPS bearer context request 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11001010"> <!-- Modify EPS bearer context accept 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11001011"> <!-- Modify EPS bearer context reject 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11001101"> <!-- Deactivate EPS bearer context request 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11001110"> <!-- Deactivate EPS bearer context accept 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010000"> <!-- PDN connectivity request 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#RequestType_V"/>
+          <fragment href="#PDNType_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010001"> <!-- PDN connectivity reject 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010010"> <!-- PDN disconnect request 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#LinkedEPSBearerIdentity_V"/>
+          <fragment href="#SpareHalfOctet_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010011"> <!-- PDN disconnect reject 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010100"> <!-- Bearer resource allocation request 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#LinkedEPSBearerIdentity_V"/>
+          <fragment href="#SpareHalfOctet_V"/>
+          <fragment href="#TrafficFlowAggregateDescription_LV"/>
+          <record name="Required Traffic Flow QoS">
+            <fragment href="#QualityOfService_LV"/>
+          </record>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010101"> <!-- Bearer resource allocation reject 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010110"> <!-- Bearer resource modification request 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <record name="EPS Bearer Identity for Packet Filter">
+            <fragment href="#LinkedEPSBearerIdentity_V"/>
+          </record>
+          <fragment href="#SpareHalfOctet_V"/>
+          <fragment href="#TrafficFlowAggregateDescription_LV"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11010111"> <!-- Bearer resource modification reject 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11011001"> <!-- ESM information request 0xtodo 8.2.todo -->
           <fragment href="#Empty"/>
         </case>
         <case value="0b11011010"> <!-- ESM information response 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#OptionalElements"/>
         </case>
         <case value="0b11101000"> <!-- ESM status 0xtodo 8.2.todo -->
-          <fragment href="#Empty"/>
+          <fragment href="#ESMCause_V"/>
         </case>
       </switch>
     </record>
